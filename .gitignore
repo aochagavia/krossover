@@ -1,0 +1,6 @@
+.idea
+.gradle
+.kotlin
+.mvn-repo
+build
+gradle/jdk
