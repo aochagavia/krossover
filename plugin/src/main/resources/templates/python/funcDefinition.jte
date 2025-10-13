@@ -26,7 +26,7 @@ ${@`    self,`}
 @if(!function.getParams().isEmpty())
 @template.python.funcParamDecl(funcParams = function.getParams())
 @endif
-):
+)${PythonHelper.returnTypeAnnotation(function.getReturnType())}:
 ${PythonHelper.formatDocString("    ", function.getDocString())}
 <%--Function body--%>
     @if(function.isStatic())

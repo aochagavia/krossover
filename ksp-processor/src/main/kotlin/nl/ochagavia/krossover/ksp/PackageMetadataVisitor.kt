@@ -14,7 +14,6 @@ import com.google.devtools.ksp.symbol.Visibility
 import nl.ochagavia.krossover.ClassName
 import nl.ochagavia.krossover.FunctionKind
 import nl.ochagavia.krossover.JvmLibrary
-import nl.ochagavia.krossover.JvmType
 import nl.ochagavia.krossover.KotlinClass
 import nl.ochagavia.krossover.KotlinClassKind
 import nl.ochagavia.krossover.KotlinConstructor
@@ -23,6 +22,7 @@ import nl.ochagavia.krossover.KotlinEnumEntry
 import nl.ochagavia.krossover.KotlinFunction
 import nl.ochagavia.krossover.KotlinFunctionParam
 import nl.ochagavia.krossover.KotlinProperty
+import nl.ochagavia.krossover.KotlinType
 import java.util.*
 
 class PackageMetadataVisitor {
@@ -31,7 +31,7 @@ class PackageMetadataVisitor {
     val enums: HashMap<ClassName, KotlinEnum> = HashMap()
     val nestedClasses: HashMap<ClassName, ArrayList<ClassName>> = HashMap()
     val sealedSubclasses: HashSet<ClassName> = HashSet()
-    val seenExternalTypes: HashSet<JvmType> = HashSet()
+    val seenExternalTypes: HashSet<KotlinType> = HashSet()
     val ignoredFunctions: HashSet<String> =
         HashSet(
             listOf(
@@ -96,7 +96,7 @@ class PackageMetadataVisitor {
                     val resolvedSuperTypeRaw = it.resolve()
                     val resolvedSuperType = toJvmType(resolvedSuperTypeRaw)
                     if (resolvedSuperType.name == ClassName.any) {
-                        return@flatMap emptySequence<JvmType>()
+                        return@flatMap emptySequence<KotlinType>()
                     }
 
                     val declaration = resolvedSuperTypeRaw.declaration
@@ -105,7 +105,7 @@ class PackageMetadataVisitor {
                         return@flatMap sequenceOf(resolvedSuperType)
                     }
 
-                    return@flatMap emptySequence<JvmType>()
+                    return@flatMap emptySequence<KotlinType>()
                 }.firstOrNull()
 
         val constructors = arrayListOf<KotlinConstructor>()
@@ -300,21 +300,21 @@ class PackageMetadataVisitor {
         }
     }
 
-    fun toJvmType(type: KSType?): JvmType {
+    fun toJvmType(type: KSType?): KotlinType {
         if (type == null) {
-            return JvmType(ClassName.any)
+            return KotlinType(ClassName.any)
         }
 
         val typeDecl = type.declaration
         val name = ClassName.potentiallyNested(typeDecl.packageName.asString(), typeDecl.qualifiedName!!.asString())
 
         // Generics
-        val params = mutableListOf<JvmType>()
+        val params = mutableListOf<KotlinType>()
         type.arguments.forEach {
             params.add(toJvmType(it.type?.resolve()))
         }
 
         val isStackAllocated = stackAllocatedTypes.contains(name)
-        return JvmType(name, params.toList(), isStackAllocated)
+        return KotlinType(name, params.toList(), isStackAllocated)
     }
 }

@@ -8,10 +8,8 @@ class JvmLibrary(
     val enums: HashMap<ClassName, KotlinEnum>,
     val nestedClasses: HashMap<ClassName, ArrayList<ClassName>>,
     val sealedSubclasses: HashSet<ClassName>,
-    val externalTypes: List<JvmType>,
-) {
-    fun isEnum(clazz: ClassName): Boolean = enums.any { it.value.name.fullyQualifiedName() == clazz.fullyQualifiedName() }
-}
+    val externalTypes: List<KotlinType>,
+)
 
 @Serializable
 class KotlinEnum(
@@ -31,7 +29,7 @@ class KotlinClass(
     val kind: KotlinClassKind,
     val name: ClassName,
     val sealedSubclasses: Array<ClassName>,
-    val superclass: JvmType?,
+    val superclass: KotlinType?,
     val constructors: Array<KotlinConstructor>,
     val functions: Array<KotlinFunction>,
     val properties: Array<KotlinProperty>,
@@ -63,7 +61,7 @@ class KotlinFunction(
     val name: String,
     val kind: FunctionKind,
     val params: List<KotlinFunctionParam>,
-    val returnType: JvmType?,
+    val returnType: KotlinType?,
     val docString: String?,
 ) {
     val isStatic = kind == FunctionKind.StaticTopLevel || kind == FunctionKind.StaticCompanion
@@ -72,7 +70,7 @@ class KotlinFunction(
 @Serializable
 class KotlinFunctionParam(
     val name: String,
-    val type: JvmType,
+    val type: KotlinType,
 )
 
 @Serializable

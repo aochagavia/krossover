@@ -4,7 +4,7 @@
 @import nl.ochagavia.krossover.codegen.PythonHelper
 @param KotlinEnum enumClass
 
-class ${enumClass.getName().unqualifiedName()}(Enum):
+class ${PythonHelper.classDefName(enumClass.getName())}(Enum):
 @if(enumClass.getDocString() != null)
 ${PythonHelper.formatDocString("    ", enumClass.getDocString())}
 @endif

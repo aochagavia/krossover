@@ -1,32 +1,30 @@
 package nl.ochagavia.krossover.codegen
 
 import nl.ochagavia.krossover.ClassName
-import nl.ochagavia.krossover.JvmType
 import nl.ochagavia.krossover.KotlinClass
 import nl.ochagavia.krossover.KotlinFunctionParam
+import nl.ochagavia.krossover.KotlinType
 
 object PythonHelper {
     @JvmStatic
     fun trimGetter(getterName: String): String = getterName.removePrefix("get").replaceFirstChar { it.lowercase() }
 
     @JvmStatic
-    fun classDef(clazz: KotlinClass): String {
-        val name =
-            if (clazz.name.isNestedClass()) {
-                nestedClassDefName(clazz.name)
-            } else {
-                clazz.name.unqualifiedName()
-            }
+    fun classDefName(className: ClassName): String =
+        if (className.isNestedClass()) {
+            nestedClassDefName(className)
+        } else {
+            className.unqualifiedName()
+        }
 
+    @JvmStatic
+    fun classDefInherits(clazz: KotlinClass): String {
         val superclass = clazz.superclass
-        val inherits =
-            if (superclass == null) {
-                ""
-            } else {
-                "(${superclass.name.unqualifiedNameWithNesting('.')})"
-            }
-
-        return "$name$inherits"
+        return if (superclass == null) {
+            ""
+        } else {
+            "(${superclass.name.unqualifiedNameWithNesting('.')})"
+        }
     }
 
     @JvmStatic
@@ -48,26 +46,65 @@ object PythonHelper {
 
         return when (param.type.name) {
             ClassName.string -> "_python_str_to_java_string(${param.name})"
+            ClassName.list -> "_to_kotlin_list(${param.name})"
+            ClassName.map -> "_to_kotlin_map(${param.name})"
             else -> "${param.name}._jni_ref"
         }
     }
 
     @JvmStatic
+    fun typeAnnotation(type: KotlinType): String =
+        when (type.name) {
+            // Primitives
+            ClassName.int,
+            ClassName.long,
+            ClassName.byte,
+            ClassName.char,
+            ClassName.short,
+            -> "int"
+            ClassName.boolean -> "bool"
+            ClassName.float,
+            ClassName.double,
+            -> "float"
+            // Built-ins and collections
+            ClassName.string -> "str"
+            ClassName.any -> "Any"
+            ClassName.list -> "List[${typeParamAnnotation(type, 0)}]"
+            ClassName.map -> "Dict[${typeParamAnnotation(type, 0)}, ${typeParamAnnotation(type, 1)}]"
+            // We consider anything else to be user-defined
+            else -> classDefName(type.name)
+        }
+
+    private fun typeParamAnnotation(
+        type: KotlinType,
+        paramIndex: Int,
+    ): String {
+        val param = type.params.getOrNull(paramIndex) ?: return "Any"
+        return typeAnnotation(param)
+    }
+
+    @JvmStatic
+    fun returnTypeAnnotation(type: KotlinType?): String {
+        if (type == null || type.name == ClassName.unit) return ""
+        return " -> ${typeAnnotation(type)}"
+    }
+
+    @JvmStatic
     fun returnStatement(
         publicApi: PublicApi,
-        returnType: JvmType?,
+        returnType: KotlinType?,
     ): String? {
         if (returnType == null) {
             return null
         }
 
         val fn = fromKotlinConversionFn(publicApi, returnType, 0)
-        return "return ($fn)(result)"
+        return "return cast(Any, ($fn)(result))"
     }
 
     fun fromKotlinConversionFn(
         publicApi: PublicApi,
-        type: JvmType,
+        type: KotlinType,
         nesting: Int,
     ): String {
         val lambdaParam = "x$nesting"

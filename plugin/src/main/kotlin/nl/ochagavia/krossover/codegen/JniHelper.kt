@@ -1,12 +1,12 @@
 package nl.ochagavia.krossover.codegen
 
 import nl.ochagavia.krossover.ClassName
-import nl.ochagavia.krossover.JvmType
 import nl.ochagavia.krossover.KotlinFunctionParam
+import nl.ochagavia.krossover.KotlinType
 
 object JniHelper {
     @JvmStatic
-    fun returnTypeToJniCallName(type: JvmType?): String {
+    fun returnTypeToJniCallName(type: KotlinType?): String {
         val s =
             when (type?.name) {
                 ClassName.int -> "Int"
@@ -26,26 +26,26 @@ object JniHelper {
     }
 
     @JvmStatic
-    fun toJniPrimitive(type: JvmType): String? =
+    fun toJniPrimitive(type: KotlinType): JniPrimitive? =
         when (type.name) {
-            ClassName.int -> "jint"
-            ClassName.long -> "jlong"
-            ClassName.byte -> "jbyte"
-            ClassName.boolean -> "jboolean"
-            ClassName.char -> "jchar"
-            ClassName.short -> "jshort"
-            ClassName.float -> "jfloat"
-            ClassName.double -> "jdouble"
+            ClassName.int -> JniPrimitive.jint
+            ClassName.long -> JniPrimitive.jlong
+            ClassName.byte -> JniPrimitive.jbyte
+            ClassName.boolean -> JniPrimitive.jboolean
+            ClassName.char -> JniPrimitive.jchar
+            ClassName.short -> JniPrimitive.jshort
+            ClassName.float -> JniPrimitive.jfloat
+            ClassName.double -> JniPrimitive.jdouble
             else -> null
         }
 
     @JvmStatic
     fun toJniFunctionSignature(
         params: List<KotlinFunctionParam>,
-        returnType: JvmType?,
+        returnType: KotlinType?,
     ): String {
         val returnTypeJni =
-            if (returnType == null || returnType == JvmType.unit()) {
+            if (returnType == null || returnType == KotlinType.unit()) {
                 "V"
             } else {
                 toJniSignatureType(returnType)
@@ -54,7 +54,7 @@ object JniHelper {
         return "(${params.joinToString("") { toJniSignatureType(it.type) }})$returnTypeJni"
     }
 
-    private fun toJniSignatureType(type: JvmType): String {
+    private fun toJniSignatureType(type: KotlinType): String {
         val primitive = toJniPrimitive(type)
         return if (primitive == null) {
             val jvmType =
@@ -71,16 +71,16 @@ object JniHelper {
         }
     }
 
-    private fun primitiveToJniSignature(type: String): String? {
+    private fun primitiveToJniSignature(type: JniPrimitive): String? {
         return when (type) {
-            "jint" -> "I"
-            "jlong" -> "J"
-            "jbyte" -> "B"
-            "jboolean" -> "Z"
-            "jchar" -> "C"
-            "jshort" -> "S"
-            "jfloat" -> "F"
-            "jdouble" -> "D"
+            JniPrimitive.jint -> "I"
+            JniPrimitive.jlong -> "J"
+            JniPrimitive.jbyte -> "B"
+            JniPrimitive.jboolean -> "Z"
+            JniPrimitive.jchar -> "C"
+            JniPrimitive.jshort -> "S"
+            JniPrimitive.jfloat -> "F"
+            JniPrimitive.jdouble -> "D"
             else -> return null
         }
     }

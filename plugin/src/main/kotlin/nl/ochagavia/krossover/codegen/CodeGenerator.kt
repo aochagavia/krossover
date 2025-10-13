@@ -24,7 +24,7 @@ object CodeGenerator {
                 ClassHierarchy(publicApi),
             )
         try {
-            engine.render("python/main.py.jte", publicApi, output)
+            engine.render("python/main.jte", publicApi, output)
         } catch (e: TemplateException) {
             if (e.cause == null) {
                 throw e

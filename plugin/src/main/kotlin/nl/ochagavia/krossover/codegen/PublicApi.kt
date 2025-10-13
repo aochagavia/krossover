@@ -30,6 +30,10 @@ class ClassHierarchy {
         childMap = map
     }
 
+    fun directChildren(className: ClassName): List<ClassName> {
+        return childMap.get(className) ?: return emptyList()
+    }
+
     fun allChildren(className: ClassName): List<ClassName> {
         val directChildren = childMap.get(className) ?: return emptyList()
         val transitiveChildren = directChildren.flatMap { allChildren(it) }

@@ -1,6 +1,6 @@
 @import nl.ochagavia.krossover.KotlinClass
 @import nl.ochagavia.krossover.codegen.PublicApi
-@import nl.ochagavia.krossover.JvmType
+@import nl.ochagavia.krossover.KotlinType
 @import nl.ochagavia.krossover.codegen.IndentedContent
 @import nl.ochagavia.krossover.codegen.JniHelper
 @import nl.ochagavia.krossover.codegen.PythonHelper
@@ -10,8 +10,13 @@
 @param KotlinClass clazz
 
 <%--Define the outer class--%>
-class ${PythonHelper.classDef(clazz)}:
+class ${PythonHelper.classDefName(clazz.getName())}${PythonHelper.classDefInherits(clazz)}:
 ${PythonHelper.formatDocString("    ", clazz.getDocString())}
+    _jni_ref: Any
+
+    @for(var subclass : publicApi.getClassHierarchy().allChildren(clazz.getName()))
+    ${subclass.unqualifiedName()}: TypeAlias
+    @endfor
 
     @for(var constructor : clazz.getConstructors())
     def __init__(
@@ -20,7 +25,7 @@ ${new IndentedContent(@`@template.python.funcParamDecl(funcParams = constructor.
     ):
         self._jni_ref = _construct(
             b"${clazz.getName().fullyQualifiedJniName()}",
-            b"${JniHelper.toJniFunctionSignature(constructor.getParams(), JvmType.unit())}",
+            b"${JniHelper.toJniFunctionSignature(constructor.getParams(), KotlinType.unit())}",
 ${new IndentedContent(@`@template.python.funcCallParams(publicApi = publicApi, functionParams = constructor.getParams())`, 3)}
         )
     @endfor
@@ -36,12 +41,12 @@ ${new IndentedContent(@`@template.python.funcCallParams(publicApi = publicApi, f
     !{var subclasses = publicApi.getClassHierarchy().allChildren(clazz.getName());}
     @if(!subclasses.isEmpty())
     @staticmethod
-    def _downcast(jni_ref):
+    def _downcast(jni_ref) -> Any:
         match _jni_class_name(jni_ref):
         @for(var subclass : subclasses)
 ${@`
             case "${subclass.fullyQualifiedName()}":
-                return _from_kotlin_object(${subclass.unqualifiedNameWithNesting('.')}, jni_ref)`}
+                return _from_kotlin_object(${PythonHelper.classDefName(subclass)}, jni_ref)`}
         @endfor
     @endif
 <%--Create user friendly name for this class, if it is nested--%>

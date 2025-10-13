@@ -1,9 +1,11 @@
 @import nl.ochagavia.krossover.codegen.PublicApi
 
 @param PublicApi publicApi
+from __future__ import annotations
+
 import sys
 import threading
-from typing import Any, Callable, Dict, List
+from typing import cast, Any, Callable, Dict, List, Type, TypeAlias
 from cffi import FFI
 from pathlib import Path
 from enum import Enum
@@ -23,7 +25,7 @@ def _raise_exception_if_any(env: Any):
 def _raise_if_null(env: Any, ptr: Any):
     if ptr == ffi.NULL:
         _raise_exception_if_any(env)
-        raiseException("entered unreachable code")
+        raise Exception("entered unreachable code")
 
 # Initialize library
 ffi = FFI()
@@ -43,7 +45,7 @@ lib_name = LIBRARY_NAMES.get(sys.platform)
 if lib_name is None:
     raise RuntimeError(f"Unsupported platform: {sys.platform}")
 
-lib = ffi.dlopen(str(package_dir / lib_name))
+lib: Any = ffi.dlopen(str(package_dir / lib_name))
 env_ptr = ffi.new("JNIEnv **")
 jvm_ptr = ffi.new("JavaVM **")
 
@@ -68,14 +70,14 @@ def _attach_jni_thread() -> Any:
 
     env_ptr = ffi.new("JNIEnv **")
     if jvm[0].AttachCurrentThread(jvm, ffi.cast("void **", env_ptr), ffi.NULL) != JNI_OK:
-        raise Error("failed to attach JNI thread")
+        raise RuntimeError("failed to attach JNI thread")
 
     tls.attached_jni_thread = env_ptr[0]
     return env_ptr[0]
 
 def _detach_jni_thread():
     if jvm[0].DetachCurrentThread(jvm) != JNI_OK:
-        raise Error("failed to detach JNI thread")
+        raise RuntimeError("failed to detach JNI thread")
     tls.attached_jni_thread = None
 
 def _delete_local_ref(env, jni_ref: Any):
@@ -168,7 +170,7 @@ def _java_string_to_python_str(jni_ref: Any) -> str:
     native_chars = env[0].GetStringChars(env, jni_ref, ffi.NULL)
     _raise_if_null(env, native_chars)
     native_chars_byte_len = env[0].GetStringLength(env, jni_ref) * 2
-    python_str = bytes(ffi.buffer(native_chars, native_chars_byte_len)).decode("utf-16-le", "strict")
+    python_str = bytes(cast(Any, ffi.buffer(native_chars, native_chars_byte_len))).decode("utf-16-le", "strict")
     env[0].ReleaseStringChars(env, jni_ref, native_chars)
     _detach_jni_thread()
     return python_str
@@ -205,11 +207,17 @@ def _from_kotlin_list(
 
     return python_list
 
+def _to_kotlin_list(list: List[Any]) -> Any:
+    raise RuntimeError("not implemented")
+
+def _to_kotlin_map(list: Dict[Any, Any]) -> Any:
+    raise RuntimeError("not implemented")
+
 def _from_kotlin_map(
     jni_ref: Any,
     wrap_key_fn: Callable[[Any], Any],
     wrap_value_fn: Callable[[Any], Any]
-) -> List[Any]:
+) -> Dict[Any, Any]:
     python_dict: dict[Any, Any] = {}
     iterator_class_name = b"org/kson/SimpleMapIterator"
     pair_class_name = b"org/kson/SimpleMapEntry"
