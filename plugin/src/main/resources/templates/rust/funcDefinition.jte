@@ -21,7 +21,7 @@ ${@`    &self,`}
 @if(!function.getParams().isEmpty())
 ${new IndentedContent(@`@template.rust.funcParamDecl(funcParams = function.getParams())`)}
 @endif
-)${RustHelper.returnTypeAnnotation(publicApi.getReturnTypeMappings().getRust(), function.getReturnType())} {
+)${RustHelper.returnTypeAnnotation(publicApi.getRustConfig().getReturnTypeMappings(), function.getReturnType())} {
 <%--Function body--%>
     @if(function.isStatic())
     let self_ptr = util::access_static_field(c"${className.fullyQualifiedJniName()}", c"INSTANCE", c"L${className.fullyQualifiedJniName()};");
@@ -43,5 +43,5 @@ ${new IndentedContent(@`@template.rust.funcCallParamObjects(functionParams = fun
 ${new IndentedContent(@`@template.rust.funcCallParams(functionParams = function.getParams())`, 2)}
     );
 
-    ${RustHelper.returnStatement(publicApi.getReturnTypeMappings().getRust(), function.getReturnType())}
+    ${RustHelper.returnStatement(publicApi.getRustConfig().getReturnTypeMappings(), function.getReturnType())}
 }

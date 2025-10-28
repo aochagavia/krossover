@@ -5,9 +5,7 @@ import gg.jte.TemplateEngine
 import gg.jte.TemplateException
 import gg.jte.output.StringOutput
 import gg.jte.resolve.ResourceCodeResolver
-import nl.ochagavia.krossover.ClassName
 import nl.ochagavia.krossover.KotlinLibrary
-import nl.ochagavia.krossover.gradle.ReturnTypeMapping
 import org.gradle.api.GradleException
 import java.io.File
 import kotlin.io.path.Path
@@ -17,7 +15,11 @@ class CodeGenerator {
     val publicApi: PublicApi
     val engine: TemplateEngine
 
-    constructor(kotlinLibrary: KotlinLibrary, rustReturnTypeMappings: Map<ClassName, ReturnTypeMapping>) {
+    constructor(
+        kotlinLibrary: KotlinLibrary,
+        libName: String,
+        rustConfig: RustConfig,
+    ) {
         val codeResolver = ResourceCodeResolver("templates")
         engine = TemplateEngine.create(codeResolver, Path("."), ContentType.Plain, this::class.java.classLoader)
         engine.setTrimControlStructures(true)
@@ -28,7 +30,8 @@ class CodeGenerator {
                 kotlinLibrary.enums,
                 kotlinLibrary.nestedClasses,
                 ClassHierarchy(kotlinLibrary),
-                ReturnTypeMappings(rustReturnTypeMappings),
+                libName,
+                rustConfig,
             )
     }
 

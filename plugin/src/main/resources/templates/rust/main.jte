@@ -6,7 +6,7 @@
 #[macro_use]
 mod util;
 mod sys {
-    pub use kson_sys::*;
+    pub use ${publicApi.getRustConfig().getJniSysModule()}::*;
 }
 
 use std::ffi::c_int;

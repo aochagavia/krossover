@@ -14,11 +14,10 @@ open class KrossoverExtension
         objects: ObjectFactory,
     ) {
         val rootClasses: ListProperty<String> = objects.listProperty(String::class.java)
-        val packages: ListProperty<String> = objects.listProperty(String::class.java)
+        val exposedPackages: ListProperty<String> = objects.listProperty(String::class.java)
         val additionalJniClasses: ListProperty<String> = objects.listProperty(String::class.java)
-        val outputPackageName: Property<String> = objects.property(String::class.java).convention("public-api")
-        val fileName: Property<String> = objects.property(String::class.java).convention("api.json")
-        val jniHeaderPath: Property<Path> = objects.property(Path::class.java)
+        val libName: Property<String> = objects.property(String::class.java)
+        val jniHeaderOutputFile: Property<Path> = objects.property(Path::class.java)
 
         val python: KrossoverPythonExtension = objects.newInstance(KrossoverPythonExtension::class.java)
 
@@ -43,6 +42,7 @@ open class KrossoverRustExtension
         objects: ObjectFactory,
     ) {
         val outputDir: Property<Path> = objects.property(Path::class.java)
+        val jniSysModule: Property<String> = objects.property(String::class.java)
         val returnTypeMappings: ListProperty<ReturnTypeMapping> = objects.listProperty(ReturnTypeMapping::class.java)
     }
 

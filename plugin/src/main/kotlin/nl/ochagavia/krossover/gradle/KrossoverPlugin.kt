@@ -8,8 +8,7 @@ import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import java.util.*
-import kotlin.io.path.Path
-import kotlin.io.path.pathString
+import kotlin.io.path.absolutePathString
 
 class KrossoverPlugin : Plugin<Project> {
     fun readPluginVersion(): String {
@@ -27,6 +26,12 @@ class KrossoverPlugin : Plugin<Project> {
         kspConfigurationName: String?,
         targetName: String?,
     ) {
+        val krossoverOutputDir = project.projectDir.resolve("build/kotlin/krossover")
+        val metadataOutputDir = krossoverOutputDir.resolve("metadata")
+        val apiJsonPath = metadataOutputDir.resolve("api.json")
+        val jniConfigPath = metadataOutputDir.resolve("jni-config.json")
+        val defaultArtifactsDir = krossoverOutputDir.resolve("artifacts")
+
         project.pluginManager.apply("com.google.devtools.ksp")
         project.pluginManager.withPlugin("com.google.devtools.ksp") {
             val kspConfig = kspConfigurationName ?: "ksp"
@@ -42,10 +47,9 @@ class KrossoverPlugin : Plugin<Project> {
                 )
                 ksp.arg(
                     "packages",
-                    ext.packages.map { it.joinToString(",") },
+                    ext.exposedPackages.map { it.joinToString(",") },
                 )
-                ksp.arg("outputPackageName", ext.outputPackageName)
-                ksp.arg("fileName", ext.fileName)
+                ksp.arg("apiJsonPath", apiJsonPath.absolutePath)
             }
 
             // Register `GenerateGraalNativeImageConfigTask`
@@ -54,30 +58,9 @@ class KrossoverPlugin : Plugin<Project> {
                     "generateJniConfig${targetName ?: ""}",
                     GenerateGraalNativeImageConfigTask::class.java,
                 ) {
-                    val outPkg = ext.outputPackageName
-                    val apiName = ext.fileName
-
-                    val mainSourceSet =
-                        if (targetName == null) {
-                            "main"
-                        } else {
-                            val targetNameUncap = targetName.replaceFirstChar { c -> c.lowercase() }
-                            "$targetNameUncap/${targetNameUncap}Main"
-                        }
-
                     it.additionalJniClasses.set(ext.additionalJniClasses)
-                    it.publicApiMetadataFile.set(
-                        project.layout.buildDirectory.file(
-                            outPkg.zip(apiName) { pkg, name ->
-                                "generated/ksp/$mainSourceSet/resources/$pkg/$name"
-                            },
-                        ),
-                    )
-                    it.jniConfigOutputFile.set(
-                        project.layout.buildDirectory.file(
-                            outPkg.map { pkg -> "generated/ksp/$mainSourceSet/resources/$pkg/jni-config.json" },
-                        ),
-                    )
+                    it.publicApiMetadataFile.set(apiJsonPath)
+                    it.jniConfigOutputFile.set(jniConfigPath)
                 }
 
             jniTask.configure { task ->
@@ -98,55 +81,41 @@ class KrossoverPlugin : Plugin<Project> {
 
                     it.dependsOn(jniTask)
 
-                    val outPkg = ext.outputPackageName
-                    val apiName = ext.fileName
-
-                    val mainSourceSet =
-                        if (targetName == null) {
-                            "main"
-                        } else {
-                            val targetNameUncap = targetName.replaceFirstChar { c -> c.lowercase() }
-                            "$targetNameUncap/${targetNameUncap}Main"
-                        }
-
-                    it.publicApiMetadataFile.set(
-                        project.layout.buildDirectory.file(
-                            outPkg.zip(apiName) { pkg, name ->
-                                "generated/ksp/$mainSourceSet/resources/$pkg/$name"
-                            },
-                        ),
-                    )
+                    it.publicApiMetadataFile.set(apiJsonPath)
                     it.jniHeaderPath.set(
                         project.layout.buildDirectory.file(
-                            outPkg.map { pkg ->
-                                ext.jniHeaderPath
-                                    .orElse(Path("generated/ksp/$mainSourceSet/resources/$pkg/jni_simplified.h"))
-                                    .get()
-                                    .pathString
-                            },
+                            ext.jniHeaderOutputFile
+                                .orElse(defaultArtifactsDir.resolve("jni_simplified.h").toPath())
+                                .get()
+                                .absolutePathString(),
                         ),
                     )
                     it.pythonDir.set(
                         project.layout.buildDirectory.file(
-                            outPkg.map { pkg ->
-                                ext.python.outputDir
-                                    .orElse(Path("generated/ksp/$mainSourceSet/resources/$pkg/python"))
-                                    .get()
-                                    .pathString
-                            },
+                            ext.python.outputDir
+                                .orElse(defaultArtifactsDir.resolve("python").toPath())
+                                .get()
+                                .absolutePathString(),
                         ),
                     )
                     it.rustDir.set(
                         project.layout.buildDirectory.file(
-                            outPkg.map { pkg ->
-                                ext.rust.outputDir
-                                    .orElse(Path("generated/ksp/$mainSourceSet/resources/$pkg/rust"))
-                                    .get()
-                                    .pathString
-                            },
+                            ext.rust.outputDir
+                                .orElse(defaultArtifactsDir.resolve("rust").toPath())
+                                .get()
+                                .absolutePathString(),
                         ),
                     )
-
+                    it.libName.set(
+                        ext.libName
+                            .orElse("default")
+                            .get(),
+                    )
+                    it.rustJniSysModule.set(
+                        ext.rust.jniSysModule
+                            .orElse("jni_sys")
+                            .get(),
+                    )
                     it.rustReturnTypeMappings.set(
                         ext.rust.returnTypeMappings.get().associateBy { mapping ->
                             ClassName.notNested(mapping.kotlinType)

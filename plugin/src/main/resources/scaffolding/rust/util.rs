@@ -345,15 +345,16 @@ pub(super) fn from_kotlin_list<T: FromKotlinObject>(list: jobject) -> Vec<T> {
     let mut elements = Vec::new();
 
     let (env, _detach_guard) = attach_thread_to_java_vm();
-    let iterator_class_name = c"org/kson/SimpleListIterator";
+    let iterator_class_name = c"java/util/Iterator";
     let iterator_class = get_class(env, iterator_class_name);
-    let iterator = call_jvm_function!(self, iterator_class_name, c"<init>", c"(Ljava/util/List;)V", NewObject, iterator_class.as_kotlin_object(), list);
+    let iterator = call_jvm_function!(self, c"java/util/List", c"iterator", c"()Ljava/util/Iterator;", CallObjectMethod, list);
     loop {
-        let item_local = call_jvm_function!(self, iterator_class_name, c"next", c"()Ljava/lang/Object;", CallObjectMethod, iterator.as_kotlin_object());
-        if item_local.is_null() {
-            break
+        let has_next = call_jvm_function!(self, iterator_class_name, c"hasNext", c"()Z", CallBooleanMethod, iterator.as_kotlin_object());
+        if has_next == 0 {
+            break;
         }
 
+        let item_local = call_jvm_function!(self, iterator_class_name, c"next", c"()Ljava/lang/Object;", CallObjectMethod, iterator.as_kotlin_object());
         elements.push(T::from_kotlin_object(item_local));
     }
 
@@ -370,12 +371,20 @@ pub(super) fn from_kotlin_value_map<
 
     let (env, _detach_guard) = attach_thread_to_java_vm();
 
-    let iterator_class_name = c"org/kson/SimpleMapIterator";
-    let pair_class_name = c"org/kson/SimpleMapEntry";
+    // Obtain iterator
+    let entry_set = call_jvm_function!(self, c"java/util/Map", c"entrySet", c"()Ljava/util/Set;", CallObjectMethod, map);
+    let iterator = call_jvm_function!(self, c"java/util/Set", c"iterator", c"()Ljava/util/Iterator;", CallObjectMethod, entry_set);
+
+    let iterator_class_name = c"java/util/Iterator";
     let iterator_class = get_class(env, iterator_class_name);
-    let iterator = call_jvm_function!(self, iterator_class_name, c"<init>", c"(Ljava/util/Map;)V", NewObject, iterator_class.as_kotlin_object(), map);
+    let pair_class_name = c"java/util/Map$Entry";
     loop {
-        let pair_local = call_jvm_function!(self, iterator_class_name, c"next", c"()Lorg/kson/SimpleMapEntry;", CallObjectMethod, iterator.as_kotlin_object());
+        let has_next = call_jvm_function!(self, iterator_class_name, c"hasNext", c"()Z", CallBooleanMethod, iterator.as_kotlin_object());
+        if has_next == 0 {
+            break;
+        }
+
+        let pair_local = call_jvm_function!(self, iterator_class_name, c"next", c"()Ljava/lang/Object;", CallObjectMethod, iterator.as_kotlin_object());
         if pair_local.is_null() {
             break
         }

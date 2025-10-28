@@ -28,11 +28,24 @@ abstract class GenerateGraalNativeImageConfigTask : DefaultTask() {
 
     @TaskAction
     fun generate() {
+        val requiredJavaClasses =
+            listOf(
+                "java.lang.Class",
+                "java.util.List",
+                "java.util.Map",
+                "java.util.Iterator", // Necessary to iterate through maps and lists
+                "java.util.Set", // Necessary to iterate through maps
+                "java.util.Map\$Entry", // Necessary to iterate through maps
+            )
+
         val metadataJson = publicApiMetadataFile.get().asFile.readText(Charsets.UTF_8)
         val metadata = Json.decodeFromString(KotlinLibrary.serializer(), metadataJson)
         val classes = metadata.classes.map { JniClassConfig(it.value.name) }
         val enums = metadata.enums.map { JniClassConfig(it.key) }
-        val additional = additionalJniClasses.getOrElse(emptyList<String>()).map { JniClassConfig(ClassName.notNested(it)) }
+        val additional =
+            additionalJniClasses.getOrElse(emptyList<String>()).plus(requiredJavaClasses).map {
+                JniClassConfig(ClassName.notNested(it))
+            }
         val jniConfig = JniConfig(classes + enums + additional)
         jniConfigOutputFile.get().asFile.writeText(Json.encodeToString(jniConfig))
     }

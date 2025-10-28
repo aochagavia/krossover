@@ -36,9 +36,9 @@ with open(package_dir / "jni_simplified.h", "r") as f:
 ffi.cdef(header)
 
 LIBRARY_NAMES: Dict[str, str] = {
-    "win32": "kson.dll",
-    "darwin": "libkson.dylib",
-    "linux": "libkson.so",
+    "win32": "${publicApi.getLibName()}.dll",
+    "darwin": "lib${publicApi.getLibName()}.dylib",
+    "linux": "lib${publicApi.getLibName()}.so",
 }
 
 lib_name = LIBRARY_NAMES.get(sys.platform)
@@ -56,7 +56,7 @@ vm_args[0].options = ffi.NULL
 vm_args[0].ignoreUnrecognized = 1  # JNI_TRUE
 
 if lib.JNI_CreateJavaVM(jvm_ptr, ffi.cast("void **", env_ptr), vm_args) != 0:
-    raise Exception("failed to load KSON dynamic library")
+    raise Exception("failed to load ${publicApi.getLibName()} dynamic library")
 
 jvm = ffi.gc(jvm_ptr[0], lambda x: x[0].DestroyJavaVM(x))
 
@@ -197,12 +197,14 @@ def _from_kotlin_list(
     jni_ref: Any, wrap_item_fn: Callable[[Any], Any]
 ) -> List[Any]:
     python_list: List[Any] = []
-    iterator_class_name = b"org/kson/SimpleListIterator"
-    iterator = _construct(iterator_class_name, b"(Ljava/util/List;)V", [jni_ref])
+    iterator_class_name = b"java/util/Iterator"
+    iterator = _call_method(b"java/util/List", jni_ref, b"iterator", b"()Ljava/util/Iterator;", "ObjectMethod", [])
     while True:
-        item_ref = _call_method(iterator_class_name, iterator, b"next", b"()Ljava/lang/Object;", "ObjectMethod", [])
-        if item_ref == ffi.NULL:
+        has_next = _call_method(iterator_class_name, iterator, b"hasNext", b"()Z", "BooleanMethod", [])
+        if has_next == 0:
             break
+
+        item_ref = _call_method(iterator_class_name, iterator, b"next", b"()Ljava/lang/Object;", "ObjectMethod", [])
         python_list.append(wrap_item_fn(item_ref))
 
     return python_list
@@ -219,13 +221,17 @@ def _from_kotlin_map(
     wrap_value_fn: Callable[[Any], Any]
 ) -> Dict[Any, Any]:
     python_dict: dict[Any, Any] = {}
-    iterator_class_name = b"org/kson/SimpleMapIterator"
-    pair_class_name = b"org/kson/SimpleMapEntry"
-    iterator = _construct(iterator_class_name, b"(Ljava/util/Map;)V", [jni_ref])
+    entry_set = _call_method(b"java/util/Map", jni_ref, b"entrySet", b"()Ljava/util/Set;", "ObjectMethod", [])
+    iterator = _call_method(b"java/util/Set", entry_set, b"iterator", b"()Ljava/util/Iterator;", "ObjectMethod", [])
+
+    iterator_class_name = b"java/util/Iterator"
+    pair_class_name = b"java/util/Map$Entry"
     while True:
-        pair_ref = _call_method(iterator_class_name, iterator, b"next", b"()Lorg/kson/SimpleMapEntry;", "ObjectMethod", [])
-        if pair_ref == ffi.NULL:
+        has_next = _call_method(iterator_class_name, iterator, b"hasNext", b"()Z", "BooleanMethod", [])
+        if has_next == 0:
             break
+
+        pair_ref = _call_method(iterator_class_name, iterator, b"next", b"()Ljava/lang/Object;", "ObjectMethod", [])
         _key_ref =  _call_method(pair_class_name, pair_ref, b"getKey", b"()Ljava/lang/Object;", "ObjectMethod", [])
         _value_ref =  _call_method(pair_class_name, pair_ref, b"getValue", b"()Ljava/lang/Object;", "ObjectMethod", [])
         python_dict[wrap_key_fn(_key_ref)] = wrap_value_fn(_value_ref)

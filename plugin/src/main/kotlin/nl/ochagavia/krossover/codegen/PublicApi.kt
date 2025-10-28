@@ -11,9 +11,11 @@ class PublicApi(
     val enums: HashMap<ClassName, KotlinEnum>,
     val nestedClasses: HashMap<ClassName, ArrayList<ClassName>>,
     val classHierarchy: ClassHierarchy,
-    val returnTypeMappings: ReturnTypeMappings,
+    val libName: String,
+    val rustConfig: RustConfig,
 )
 
-class ReturnTypeMappings(
-    val rust: Map<ClassName, ReturnTypeMapping>,
+class RustConfig(
+    val jniSysModule: String,
+    val returnTypeMappings: Map<ClassName, ReturnTypeMapping>,
 )
