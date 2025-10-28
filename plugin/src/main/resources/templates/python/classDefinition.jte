@@ -1,8 +1,9 @@
 @import nl.ochagavia.krossover.KotlinClass
-@import nl.ochagavia.krossover.codegen.PublicApi
+@import nl.ochagavia.krossover.codegen.*
 @import nl.ochagavia.krossover.KotlinType
 @import nl.ochagavia.krossover.codegen.IndentedContent
 @import nl.ochagavia.krossover.codegen.JniHelper
+@import nl.ochagavia.krossover.codegen.IdentHelper
 @import nl.ochagavia.krossover.codegen.PythonHelper
 @import java.util.ArrayList
 
@@ -30,8 +31,14 @@ ${new IndentedContent(@`@template.python.funcCallParams(publicApi = publicApi, f
         )
     @endfor
 
+    def __eq__(self, other):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
+
+    def __hash__(self):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
+
     @for(var property : clazz.getProperties())
-    ${new IndentedContent(@`@template.python.funcDefinition(publicApi = publicApi, className = clazz.getName(), function = property.getGetter(), functionNameOverride = PythonHelper.trimGetter(property.getGetter().getName()))`)}
+    ${new IndentedContent(@`@template.python.funcDefinition(publicApi = publicApi, className = clazz.getName(), function = property.getGetter(), functionNameOverride = IdentHelper.trimGetter(property.getGetter().getName()))`)}
     @endfor
 
     @for(var function : clazz.getFunctions())
@@ -51,7 +58,7 @@ ${@`
     @endif
 <%--Create user friendly name for this class, if it is nested--%>
 @if(clazz.getName().isNestedClass())
-${clazz.getName().unqualifiedNameWithNesting('.')} = ${PythonHelper.nestedClassDefName(clazz.getName())}
+${clazz.getName().unqualifiedNameWithNesting(".")} = ${PythonHelper.nestedClassDefName(clazz.getName())}
 @endif
 <%--Define nested classes, if any--%>
 !{var nestedClasses = publicApi.getNestedClasses().getOrDefault(clazz.getName(), new ArrayList<>());}

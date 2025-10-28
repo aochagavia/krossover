@@ -73,12 +73,12 @@ data class ClassName private constructor(
 
     fun fullyQualifiedJavaName(): String = name.replace('$', '.')
 
-    fun unqualifiedNameWithNesting(overrideNestedClassSeparator: Char? = null): String {
+    fun unqualifiedNameWithNesting(overrideNestedClassSeparator: String? = null): String {
         val nameWithoutPackage = name.substringAfterLast('.', name)
         return if (overrideNestedClassSeparator == null) {
             nameWithoutPackage
         } else {
-            nameWithoutPackage.replace('$', overrideNestedClassSeparator)
+            nameWithoutPackage.replace("$", overrideNestedClassSeparator)
         }
     }
 
@@ -87,6 +87,8 @@ data class ClassName private constructor(
         val nameWithoutParent = nameWithoutPackage.substringAfterLast('$', nameWithoutPackage)
         return nameWithoutParent
     }
+
+    fun packageName(): String = name.substringBeforeLast('.')
 
     object CustomSerializer : KSerializer<ClassName> {
         private val delegate = String.serializer()

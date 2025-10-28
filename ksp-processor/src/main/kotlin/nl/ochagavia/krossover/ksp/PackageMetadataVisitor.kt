@@ -9,6 +9,7 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.Nullability
 import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Visibility
 import nl.ochagavia.krossover.ClassName
@@ -94,7 +95,7 @@ class PackageMetadataVisitor {
             classDecl.superTypes
                 .flatMap {
                     val resolvedSuperTypeRaw = it.resolve()
-                    val resolvedSuperType = toJvmType(resolvedSuperTypeRaw)
+                    val resolvedSuperType = toKotlinType(resolvedSuperTypeRaw)
                     if (resolvedSuperType.name == ClassName.any) {
                         return@flatMap emptySequence<KotlinType>()
                     }
@@ -137,7 +138,7 @@ class PackageMetadataVisitor {
                                 it.parameters.map { parameter ->
                                     KotlinFunctionParam(
                                         parameter.name!!.asString(),
-                                        toJvmType(parameter.type.resolve()),
+                                        toKotlinType(parameter.type.resolve()),
                                     )
                                 },
                                 it.docString,
@@ -166,7 +167,7 @@ class PackageMetadataVisitor {
                         "get${it.simpleName.asString().replaceFirstChar { c -> c.uppercase() }}",
                         FunctionKind.NonStatic,
                         arrayListOf(),
-                        toJvmType(type),
+                        toKotlinType(type),
                         it.docString,
                     )
                 properties.add(KotlinProperty(it.simpleName.asString(), getter))
@@ -208,7 +209,7 @@ class PackageMetadataVisitor {
             else -> {
                 val sealedSubclassesForThisClass = arrayListOf<ClassName>()
                 classDecl.getSealedSubclasses().forEach {
-                    val subclassName = className.withNestedClass(it.packageName.asString(), it.qualifiedName!!.asString())
+                    val subclassName = ClassName.potentiallyNested(it.packageName.asString(), it.qualifiedName!!.asString())
                     sealedSubclassesForThisClass.add(subclassName)
                     sealedSubclasses.add(subclassName)
                 }
@@ -262,10 +263,10 @@ class PackageMetadataVisitor {
                     function.parameters.map {
                         KotlinFunctionParam(
                             it.name!!.asString(),
-                            toJvmType(it.type.resolve()),
+                            toKotlinType(it.type.resolve()),
                         )
                     },
-                    function.returnType?.resolve()?.let { toJvmType(it) },
+                    function.returnType?.resolve()?.let { toKotlinType(it) },
                     function.docString,
                 ),
             )
@@ -291,7 +292,7 @@ class PackageMetadataVisitor {
                 this.pendingClassDecls.add(typeDecl)
             }
         } else {
-            this.seenExternalTypes.add(toJvmType(type))
+            this.seenExternalTypes.add(toKotlinType(type))
         }
 
         // Also visit concrete types that instantiate generics
@@ -300,9 +301,9 @@ class PackageMetadataVisitor {
         }
     }
 
-    fun toJvmType(type: KSType?): KotlinType {
+    fun toKotlinType(type: KSType?): KotlinType {
         if (type == null) {
-            return KotlinType(ClassName.any)
+            return KotlinType(ClassName.any, isNullable = true)
         }
 
         val typeDecl = type.declaration
@@ -311,10 +312,10 @@ class PackageMetadataVisitor {
         // Generics
         val params = mutableListOf<KotlinType>()
         type.arguments.forEach {
-            params.add(toJvmType(it.type?.resolve()))
+            params.add(toKotlinType(it.type?.resolve()))
         }
 
         val isStackAllocated = stackAllocatedTypes.contains(name)
-        return KotlinType(name, params.toList(), isStackAllocated)
+        return KotlinType(name, type.nullability == Nullability.NULLABLE, params.toList(), isStackAllocated)
     }
 }

@@ -1,5 +1,5 @@
 @import nl.ochagavia.krossover.KotlinFunctionParam
-@import nl.ochagavia.krossover.codegen.CasingHelper
+@import nl.ochagavia.krossover.codegen.IdentHelper
 @import nl.ochagavia.krossover.codegen.IndentedContent
 @import nl.ochagavia.krossover.codegen.PublicApi
 @import nl.ochagavia.krossover.codegen.PythonHelper
@@ -14,7 +14,7 @@
 [
 ${new IndentedContent(@`
 @for(var p : functionParams)
-${PythonHelper.castParam(publicApi, CasingHelper.snakeCase(p))},
+${PythonHelper.castParam(publicApi, IdentHelper.snakeCase(p))},
 @endfor
 `)}
 ]

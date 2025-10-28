@@ -4,7 +4,7 @@
 @import nl.ochagavia.krossover.codegen.IndentedContent
 @import nl.ochagavia.krossover.codegen.JniHelper
 @import nl.ochagavia.krossover.codegen.PythonHelper
-@import nl.ochagavia.krossover.codegen.CasingHelper
+@import nl.ochagavia.krossover.codegen.IdentHelper
 
 @param PublicApi publicApi
 @param ClassName className
@@ -16,9 +16,9 @@
 @staticmethod
 @endif
 @if(functionNameOverride == null)
-def ${CasingHelper.snakeCase(function.getName())}(
+def ${IdentHelper.snakeCase(function.getName())}(
 @else
-def ${CasingHelper.snakeCase(functionNameOverride)}(
+def ${IdentHelper.snakeCase(functionNameOverride)}(
 @endif
 @if(!function.isStatic())
 ${@`    self,`}

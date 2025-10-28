@@ -1,6 +1,7 @@
 package nl.ochagavia.krossover.gradle
 
 import com.google.devtools.ksp.gradle.KspExtension
+import nl.ochagavia.krossover.ClassName
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -115,15 +116,41 @@ class KrossoverPlugin : Plugin<Project> {
                             },
                         ),
                     )
-                    it.pythonFile.set(
+                    it.jniHeaderPath.set(
                         project.layout.buildDirectory.file(
                             outPkg.map { pkg ->
-                                ext.pythonOutputFile
-                                    .orElse(Path("generated/ksp/$mainSourceSet/resources/$pkg/main.py"))
+                                ext.jniHeaderPath
+                                    .orElse(Path("generated/ksp/$mainSourceSet/resources/$pkg/jni_simplified.h"))
                                     .get()
                                     .pathString
                             },
                         ),
+                    )
+                    it.pythonDir.set(
+                        project.layout.buildDirectory.file(
+                            outPkg.map { pkg ->
+                                ext.python.outputDir
+                                    .orElse(Path("generated/ksp/$mainSourceSet/resources/$pkg/python"))
+                                    .get()
+                                    .pathString
+                            },
+                        ),
+                    )
+                    it.rustDir.set(
+                        project.layout.buildDirectory.file(
+                            outPkg.map { pkg ->
+                                ext.rust.outputDir
+                                    .orElse(Path("generated/ksp/$mainSourceSet/resources/$pkg/rust"))
+                                    .get()
+                                    .pathString
+                            },
+                        ),
+                    )
+
+                    it.rustReturnTypeMappings.set(
+                        ext.rust.returnTypeMappings.get().associateBy { mapping ->
+                            ClassName.notNested(mapping.kotlinType)
+                        },
                     )
                 }
         }

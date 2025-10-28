@@ -7,9 +7,6 @@ import nl.ochagavia.krossover.KotlinType
 
 object PythonHelper {
     @JvmStatic
-    fun trimGetter(getterName: String): String = getterName.removePrefix("get").replaceFirstChar { it.lowercase() }
-
-    @JvmStatic
     fun classDefName(className: ClassName): String =
         if (className.isNestedClass()) {
             nestedClassDefName(className)
@@ -23,12 +20,12 @@ object PythonHelper {
         return if (superclass == null) {
             ""
         } else {
-            "(${superclass.name.unqualifiedNameWithNesting('.')})"
+            "(${superclass.name.unqualifiedNameWithNesting(".")})"
         }
     }
 
     @JvmStatic
-    fun nestedClassDefName(className: ClassName): String = "_${className.unqualifiedNameWithNesting('_')}"
+    fun nestedClassDefName(className: ClassName): String = "_${className.unqualifiedNameWithNesting("_")}"
 
     @JvmStatic
     fun castParam(
@@ -108,7 +105,7 @@ object PythonHelper {
         nesting: Int,
     ): String {
         val lambdaParam = "x$nesting"
-        val className = type.name.unqualifiedNameWithNesting('.')
+        val className = type.name.unqualifiedNameWithNesting(".")
         if (publicApi.enums.containsKey(type.name)) {
             return "lambda $lambdaParam: $className._from_kotlin_enum($lambdaParam)"
         }

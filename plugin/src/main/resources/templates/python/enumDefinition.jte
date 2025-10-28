@@ -12,7 +12,7 @@ ${PythonHelper.formatDocString("    ", enumClass.getDocString())}
     def _to_kotlin_enum(self):
         match self:
         @for (var entry : enumClass.getEntries())
-${@`            case ${entry.getName().unqualifiedNameWithNesting('.')}:
+${@`            case ${entry.getName().unqualifiedNameWithNesting(".")}:
                 return _access_static_field(b"${enumClass.getName().fullyQualifiedJniName()}", b"${entry.getName().unqualifiedName()}", b"L${enumClass.getName().fullyQualifiedJniName()};")`}
         @endfor
 

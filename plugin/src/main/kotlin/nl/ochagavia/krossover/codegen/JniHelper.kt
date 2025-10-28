@@ -48,13 +48,14 @@ object JniHelper {
             if (returnType == null || returnType == KotlinType.unit()) {
                 "V"
             } else {
-                toJniSignatureType(returnType)
+                toJniSignature(returnType)
             }
 
-        return "(${params.joinToString("") { toJniSignatureType(it.type) }})$returnTypeJni"
+        return "(${params.joinToString("") { toJniSignature(it.type) }})$returnTypeJni"
     }
 
-    private fun toJniSignatureType(type: KotlinType): String {
+    @JvmStatic
+    fun toJniSignature(type: KotlinType): String {
         val primitive = toJniPrimitive(type)
         return if (primitive == null) {
             val jvmType =
