@@ -7,9 +7,17 @@ import nl.ochagavia.krossover.gradle.ReturnTypeMapping
 
 object RustHelper {
     @JvmStatic
-    fun classDefName(className: ClassName): String =
+    fun qualifiedClassName(className: ClassName): String =
         if (className.isNestedClass()) {
-            className.unqualifiedNameWithNesting("")
+            val parts = className.unqualifiedNameParts()
+            val mod = parts.take(parts.size - 1).joinToString("::") { IdentHelper.snakeCase(it) }
+            val prefix =
+                if (mod.isEmpty()) {
+                    ""
+                } else {
+                    "$mod::"
+                }
+            "$prefix${parts.last()}"
         } else {
             className.unqualifiedName()
         }
@@ -105,7 +113,7 @@ object RustHelper {
                         )
                     }, ${genericParamTypeAnnotation(emptyMap(), type, 1, false)}>"
                 // We consider anything else to be user-defined
-                else -> classDefName(type.name)
+                else -> qualifiedClassName(type.name)
             }
 
         return if (type.isNullable) {
@@ -147,7 +155,7 @@ object RustHelper {
                     true,
                 )}, ${genericParamTypeAnnotation(returnTypeMappings, type, 1, true)}>"
                 // We consider anything else to be user-defined
-                else -> classDefName(type.name)
+                else -> qualifiedClassName(type.name)
             }
 
         return if (type.isNullable) {
@@ -239,14 +247,14 @@ object RustHelper {
         classNameBoundaries.windowed(2, 1) {
             val outerName = ClassName.potentiallyNested(packageName, variantQualified.take(it[0]))
             val innerName = ClassName.potentiallyNested(packageName, variantQualified.take(it[1]))
-            constructor.append(classDefName(outerName))
+            constructor.append(qualifiedClassName(outerName))
             constructor.append("::")
             constructor.append(innerName.unqualifiedName())
             constructor.append('(')
         }
 
         // The last part gets special treatment
-        constructor.append(classDefName(variantName))
+        constructor.append(qualifiedClassName(variantName))
         constructor.append("::from_kotlin_object(obj)")
 
         repeat(classNameBoundaries.size - 1) {

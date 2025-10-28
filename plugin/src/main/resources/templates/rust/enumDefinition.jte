@@ -3,18 +3,24 @@
 
 @param PublicApi publicApi
 @param KotlinClass clazz
-!{var enumName = RustHelper.classDefName(clazz.getName());}
+!{var enumName = clazz.getName().unqualifiedName();}
 ${RustHelper.formatDocString("", clazz.getDocString())}
 #[derive(Clone)]
 pub enum ${enumName} {
 @for(var variant : clazz.getSealedSubclasses())
-${@`    ${variant.unqualifiedName()}(${RustHelper.classDefName(variant)}),`}
+${@`    ${variant.unqualifiedName()}(${RustHelper.qualifiedClassName(variant)}),`}
 @endfor
 }
 
+@if (clazz.getSealedSubclasses().length > 0)
+pub mod ${IdentHelper.snakeCase(clazz.getName().unqualifiedName())} {
+    use super::*;
+
 @for(var variant : clazz.getSealedSubclasses())
-@template.rust.classDefinition(publicApi = publicApi, clazz = publicApi.getClasses().get(variant))
+${new IndentedContent(@`@template.rust.classDefinition(publicApi = publicApi, clazz = publicApi.getClasses().get(variant))`)}
 @endfor
+}
+@endif
 
 impl FromKotlinObject for ${enumName} {
     fn from_kotlin_object(obj: jobject) -> Self {

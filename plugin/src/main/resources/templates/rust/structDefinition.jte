@@ -7,7 +7,7 @@
 @param PublicApi publicApi
 @param KotlinClass clazz
 
-!{var className = RustHelper.classDefName(clazz.getName());}
+!{var className = clazz.getName().unqualifiedName();}
 ${RustHelper.formatDocString("", clazz.getDocString())}
 #[derive(Clone)]
 pub struct ${className} {

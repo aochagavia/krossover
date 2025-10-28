@@ -73,6 +73,11 @@ data class ClassName private constructor(
 
     fun fullyQualifiedJavaName(): String = name.replace('$', '.')
 
+    fun unqualifiedNameParts(): List<String> {
+        val nameWithoutPackage = name.substringAfterLast('.', name)
+        return nameWithoutPackage.split('$')
+    }
+
     fun unqualifiedNameWithNesting(overrideNestedClassSeparator: String? = null): String {
         val nameWithoutPackage = name.substringAfterLast('.', name)
         return if (overrideNestedClassSeparator == null) {

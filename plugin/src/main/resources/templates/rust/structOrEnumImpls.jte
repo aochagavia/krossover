@@ -6,7 +6,7 @@
 @param PublicApi publicApi
 @param KotlinClass clazz
 
-!{var className = RustHelper.classDefName(clazz.getName());}
+!{var className = clazz.getName().unqualifiedName();}
 impl ${className} {
     <%--Own functions--%>
     @for(var property : clazz.getProperties())
