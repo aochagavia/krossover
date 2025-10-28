@@ -1,9 +1,9 @@
 package nl.ochagavia.krossover.codegen
 
 import nl.ochagavia.krossover.ClassName
-import nl.ochagavia.krossover.JvmLibrary
 import nl.ochagavia.krossover.KotlinClass
 import nl.ochagavia.krossover.KotlinFunction
+import nl.ochagavia.krossover.KotlinLibrary
 import nl.ochagavia.krossover.KotlinProperty
 import nl.ochagavia.krossover.KotlinType
 
@@ -11,7 +11,7 @@ class ClassHierarchy {
     private val classes: HashMap<ClassName, KotlinClass>
     private val childMap: HashMap<ClassName, ArrayList<ClassName>>
 
-    constructor(publicApi: JvmLibrary) {
+    constructor(publicApi: KotlinLibrary) {
         val map = hashMapOf<ClassName, ArrayList<ClassName>>()
         publicApi.classes.forEach { clazz ->
             val superclass = clazz.value.superclass ?: return@forEach

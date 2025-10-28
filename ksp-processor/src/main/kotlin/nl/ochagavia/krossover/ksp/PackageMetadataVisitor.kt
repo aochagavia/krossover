@@ -14,7 +14,6 @@ import com.google.devtools.ksp.symbol.Origin
 import com.google.devtools.ksp.symbol.Visibility
 import nl.ochagavia.krossover.ClassName
 import nl.ochagavia.krossover.FunctionKind
-import nl.ochagavia.krossover.JvmLibrary
 import nl.ochagavia.krossover.KotlinClass
 import nl.ochagavia.krossover.KotlinClassKind
 import nl.ochagavia.krossover.KotlinConstructor
@@ -22,6 +21,7 @@ import nl.ochagavia.krossover.KotlinEnum
 import nl.ochagavia.krossover.KotlinEnumEntry
 import nl.ochagavia.krossover.KotlinFunction
 import nl.ochagavia.krossover.KotlinFunctionParam
+import nl.ochagavia.krossover.KotlinLibrary
 import nl.ochagavia.krossover.KotlinProperty
 import nl.ochagavia.krossover.KotlinType
 import java.util.*
@@ -66,8 +66,8 @@ class PackageMetadataVisitor {
         this.allowedPackages = allowedPackages
     }
 
-    fun getPackageMetadata(): JvmLibrary =
-        JvmLibrary(
+    fun getPackageMetadata(): KotlinLibrary =
+        KotlinLibrary(
             classes,
             enums,
             nestedClasses,

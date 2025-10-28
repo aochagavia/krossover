@@ -6,7 +6,7 @@ import gg.jte.TemplateException
 import gg.jte.output.StringOutput
 import gg.jte.resolve.ResourceCodeResolver
 import nl.ochagavia.krossover.ClassName
-import nl.ochagavia.krossover.JvmLibrary
+import nl.ochagavia.krossover.KotlinLibrary
 import nl.ochagavia.krossover.gradle.ReturnTypeMapping
 import org.gradle.api.GradleException
 import java.io.File
@@ -17,17 +17,17 @@ class CodeGenerator {
     val publicApi: PublicApi
     val engine: TemplateEngine
 
-    constructor(jvmLibrary: JvmLibrary, rustReturnTypeMappings: Map<ClassName, ReturnTypeMapping>) {
+    constructor(kotlinLibrary: KotlinLibrary, rustReturnTypeMappings: Map<ClassName, ReturnTypeMapping>) {
         val codeResolver = ResourceCodeResolver("templates")
         engine = TemplateEngine.create(codeResolver, Path("."), ContentType.Plain, this::class.java.classLoader)
         engine.setTrimControlStructures(true)
         publicApi =
             PublicApi(
-                jvmLibrary.classes,
-                jvmLibrary.sealedSubclasses,
-                jvmLibrary.enums,
-                jvmLibrary.nestedClasses,
-                ClassHierarchy(jvmLibrary),
+                kotlinLibrary.classes,
+                kotlinLibrary.sealedSubclasses,
+                kotlinLibrary.enums,
+                kotlinLibrary.nestedClasses,
+                ClassHierarchy(kotlinLibrary),
                 ReturnTypeMappings(rustReturnTypeMappings),
             )
     }

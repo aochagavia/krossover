@@ -3,7 +3,7 @@ package nl.ochagavia.krossover
 import kotlinx.serialization.Serializable
 
 @Serializable
-class JvmLibrary(
+class KotlinLibrary(
     val classes: HashMap<ClassName, KotlinClass>,
     val enums: HashMap<ClassName, KotlinEnum>,
     val nestedClasses: HashMap<ClassName, ArrayList<ClassName>>,

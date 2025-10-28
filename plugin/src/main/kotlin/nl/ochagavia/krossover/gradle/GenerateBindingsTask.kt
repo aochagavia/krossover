@@ -2,7 +2,7 @@ package nl.ochagavia.krossover.gradle
 
 import kotlinx.serialization.json.Json
 import nl.ochagavia.krossover.ClassName
-import nl.ochagavia.krossover.JvmLibrary
+import nl.ochagavia.krossover.KotlinLibrary
 import nl.ochagavia.krossover.codegen.CodeGenerator
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
@@ -35,7 +35,7 @@ abstract class GenerateBindingsTask : DefaultTask() {
     @TaskAction
     fun generate() {
         val metadataJson = publicApiMetadataFile.get().asFile.readText(Charsets.UTF_8)
-        val metadata = Json.decodeFromString(JvmLibrary.serializer(), metadataJson)
+        val metadata = Json.decodeFromString(KotlinLibrary.serializer(), metadataJson)
         val codeGenerator = CodeGenerator(metadata, rustReturnTypeMappings.get())
         codeGenerator.generatePython(pythonDir.get().asFile)
         codeGenerator.generateRust(rustDir.get().asFile)
