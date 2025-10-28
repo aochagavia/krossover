@@ -54,7 +54,7 @@ class CodeGenerator {
                 throw GradleException("failed to render template: $stackTraceFragment$stackTraceCropped")
             }
         }
-        return output.toString()
+        return output.toString().lines().joinToString("\n") { it.trimEnd() }
     }
 
     fun generatePython(dir: File) {
