@@ -1,29 +1,27 @@
 plugins {
     kotlin("jvm")
     `maven-publish`
+    signing
 }
 
 repositories {
     mavenCentral()
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"])
-        }
-    }
-    repositories {
-        maven {
-            name = "project"
-            url = uri("../.mvn-repo")
-        }
-    }
+signing {
+    useInMemoryPgpKeys(
+        project.findProperty("signingInMemoryKey") as String,
+        project.findProperty("signingInMemoryKeyPassword") as String
+    )
+}
+
+java {
+    withJavadocJar()
 }
 
 // Configure artifact
 group = "nl.ochagavia.krossover"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 // Configure java version
 val javaVersion = "11"
