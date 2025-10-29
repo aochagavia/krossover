@@ -10,8 +10,8 @@ repositories {
 
 signing {
     useInMemoryPgpKeys(
-        project.findProperty("signingInMemoryKey") as String,
-        project.findProperty("signingInMemoryKeyPassword") as String
+        project.findProperty("signingInMemoryKey") as String?,
+        project.findProperty("signingInMemoryKeyPassword") as String?
     )
 }
 
