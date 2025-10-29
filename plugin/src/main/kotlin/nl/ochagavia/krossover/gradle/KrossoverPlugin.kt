@@ -77,8 +77,6 @@ class KrossoverPlugin : Plugin<Project> {
                     "generateJniBindings${targetName ?: ""}",
                     GenerateBindingsTask::class.java,
                 ) {
-                    project.logger.error("krossover: hello from generate config")
-
                     it.dependsOn(jniTask)
 
                     it.publicApiMetadataFile.set(apiJsonPath)
