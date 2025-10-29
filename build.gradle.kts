@@ -28,7 +28,7 @@ tasks.register("cleanMvnRepo") {
 }
 
 // The plugin project and its dependencies
-val pluginAndDeps = listOf("shared", "ksp-processor", "plugin")
+val pluginAndDeps = listOf("shared-internals", "ksp-processor", "plugin")
 
 tasks.register("publishPlugin") {
     pluginAndDeps.forEach {

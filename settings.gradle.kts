@@ -4,9 +4,9 @@ val group = "nl.ochagavia.krossover"
 
 includeBuild("build-plugin")
 
-includeBuild("shared") {
+includeBuild("shared-internals") {
     dependencySubstitution {
-        substitute(module("$group:shared")).using(project(":"))
+        substitute(module("$group:shared-internals")).using(project(":"))
     }
 }
 

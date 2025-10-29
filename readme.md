@@ -100,7 +100,7 @@ Krossover has the following components, each living in its own subproject:
 - `ksp-processor`: a compiler plugin that gathers metadata about the public API of your library.
 - `plugin`: based on the gathered metadata, generates wrapper code in the supported programming
   languages. Provides a Gradle plugin so you can easily use Krossover from a Gradle project.
-- `shared`: data types used both in `ksp-processor` and `plugin`.
+- `shared-internals`: data types used both in `ksp-processor` and `plugin`.
 
 ## Ideas for the future
 
