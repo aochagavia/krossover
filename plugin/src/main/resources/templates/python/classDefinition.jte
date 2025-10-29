@@ -24,6 +24,7 @@ ${PythonHelper.formatDocString("    ", clazz.getDocString())}
         self,
 ${new IndentedContent(@`@template.python.funcParamDecl(funcParams = constructor.getParams())`)}
     ):
+${new IndentedContent(@`@template.python.funcParamNullCheck(funcParams = constructor.getParams())`, 2)}
         self._jni_ref = _construct(
             b"${clazz.getName().fullyQualifiedJniName()}",
             b"${JniHelper.toJniFunctionSignature(constructor.getParams(), KotlinType.unit())}",

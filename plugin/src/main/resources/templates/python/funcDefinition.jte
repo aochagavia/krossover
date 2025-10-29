@@ -29,6 +29,7 @@ ${@`    self,`}
 )${PythonHelper.returnTypeAnnotation(function.getReturnType())}:
 ${PythonHelper.formatDocString("    ", function.getDocString())}
 <%--Function body--%>
+${new IndentedContent(@`@template.python.funcParamNullCheck(funcParams = function.getParams())`)}
     @if(function.isStatic())
     jni_ref = _access_static_field(b"${className.fullyQualifiedJniName()}", b"INSTANCE", b"L${className.fullyQualifiedJniName()};")
     @else
