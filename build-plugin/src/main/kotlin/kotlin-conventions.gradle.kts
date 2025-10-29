@@ -8,11 +8,79 @@ repositories {
     mavenCentral()
 }
 
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+            artifact(tasks.kotlinSourcesJar)
+
+            pom {
+                licenses {
+                    license {
+                        name.set("Apache-2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("aochagavia")
+                        name.set("Adolfo Ochagavía")
+                        email.set("maven-central@adolfo.ochagavia.nl")
+                    }
+                }
+
+                scm {
+                    connection.set("scm:git:https://github.com/aochagavia/krossover.git")
+                    developerConnection.set("scm:git:git@github.com:aochagavia/krossover.git")
+                    url.set("https://github.com/aochagavia/krossover")
+                }
+            }
+        }
+    }
+
+    repositories {
+        // Write publications into a local folder that we'll zip and upload
+        // (the automation story between Gradle and Maven Central is... painful)
+        maven {
+            name = "bundle"
+            url = uri(layout.buildDirectory.dir("maven-bundle"))
+        }
+
+        // Useful for local development
+        maven {
+            name = "local"
+            url = uri("../build/mvn-repo")
+        }
+    }
+}
+
 signing {
+    this.setRequired({
+        gradle.taskGraph.allTasks.any {
+            it.name.contains("publishMavenJavaPublicationToBundleRepository")
+        }
+    })
+
     useInMemoryPgpKeys(
         project.findProperty("signingInMemoryKey") as String?,
-        project.findProperty("signingInMemoryKeyPassword") as String?
+        project.findProperty("signingInMemoryKeyPassword") as String?,
     )
+
+    sign(publishing.publications["mavenJava"])
+}
+
+tasks.register<Zip>("bundleZip") {
+    group = "publishing"
+    description = "Zips the locally published Maven repository for manual upload."
+
+    dependsOn("publishMavenJavaPublicationToBundleRepository")
+
+    // Zip the contents of the generated Maven repo layout
+    from(layout.buildDirectory.dir("maven-bundle"))
+
+    archiveFileName.set("maven-central-bundle-${project.version}.zip")
+    destinationDirectory.set(layout.buildDirectory.dir("distributions"))
 }
 
 java {
@@ -21,7 +89,7 @@ java {
 
 // Configure artifact
 group = "nl.ochagavia.krossover"
-version = "1.0.0"
+version = "1.0.1"
 
 // Configure java version
 val javaVersion = "11"

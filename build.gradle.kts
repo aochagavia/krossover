@@ -30,9 +30,16 @@ tasks.register("cleanMvnRepo") {
 // The plugin project and its dependencies
 val pluginAndDeps = listOf("shared-internals", "ksp-processor", "plugin")
 
-tasks.register("publishPlugin") {
+// Useful for local development and testing
+tasks.register("publishLocal") {
     pluginAndDeps.forEach {
-        dependsOn(gradle.includedBuild(it).task(":publishAllPublicationsToProjectRepository"))
+        dependsOn(gradle.includedBuild(it).task(":publishMavenJavaPublicationToLocalRepository"))
+    }
+}
+
+tasks.register("bundleAllForMavenCentral") {
+    pluginAndDeps.forEach {
+        dependsOn(gradle.includedBuild(it).task(":bundleZip"))
     }
 }
 
@@ -48,7 +55,7 @@ tasks.register("functionalTest") {
     group = "verification"
 
     // Make sure the plugin has been published
-    mustRunAfter("publishPlugin")
-    dependsOn("publishPlugin")
+    mustRunAfter("publishLocal")
+    dependsOn("publishLocal")
     dependsOn(gradle.includedBuild("plugin").task(":functionalTest"))
 }
