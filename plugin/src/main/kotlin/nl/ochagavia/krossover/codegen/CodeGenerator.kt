@@ -4,7 +4,6 @@ import gg.jte.ContentType
 import gg.jte.TemplateEngine
 import gg.jte.TemplateException
 import gg.jte.output.StringOutput
-import gg.jte.resolve.ResourceCodeResolver
 import nl.ochagavia.krossover.KotlinLibrary
 import org.gradle.api.GradleException
 import java.io.File
@@ -20,8 +19,7 @@ class CodeGenerator {
         libName: String,
         rustConfig: RustConfig,
     ) {
-        val codeResolver = ResourceCodeResolver("templates")
-        engine = TemplateEngine.create(codeResolver, Path("."), ContentType.Plain, this::class.java.classLoader)
+        engine = TemplateEngine.createPrecompiled(Path("."), ContentType.Plain, this::class.java.classLoader)
         engine.setTrimControlStructures(true)
         publicApi =
             PublicApi(

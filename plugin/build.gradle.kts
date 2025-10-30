@@ -1,6 +1,7 @@
 plugins {
     id("kotlin-conventions")
     kotlin("plugin.serialization") version "2.2.20"
+    id("gg.jte.gradle") version "3.2.1"
     `java-gradle-plugin`
 }
 
@@ -15,6 +16,21 @@ dependencies {
     implementation("gg.jte:jte:3.2.1")
 
     testImplementation(kotlin("test"))
+}
+
+jte {
+    getContentType().set(gg.jte.ContentType.Plain)
+    generate()
+}
+
+// Not sure why this is needed, but Gradle complains otherwise
+tasks.named("kotlinSourcesJar") {
+    dependsOn("generateJte")
+}
+
+tasks.withType<Javadoc>().configureEach {
+    // Generated JTE template classes should not be scanned by javadoc
+    exclude("gg.jte/**")
 }
 
 val functionalTestSourceSet = sourceSets.create("functionalTest") {
