@@ -19,6 +19,7 @@ dependencies {
 }
 
 jte {
+    getTrimControlStructures().set(true)
     getContentType().set(gg.jte.ContentType.Plain)
     generate()
 }
@@ -30,7 +31,7 @@ tasks.named("kotlinSourcesJar") {
 
 tasks.withType<Javadoc>().configureEach {
     // Generated JTE template classes should not be scanned by javadoc
-    exclude("gg.jte/**")
+    exclude("gg/jte/**")
 }
 
 val functionalTestSourceSet = sourceSets.create("functionalTest") {
