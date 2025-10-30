@@ -738,18 +738,13 @@ struct JavaVM_ {
     const struct JNIInvokeInterface_ *functions;
 };
 
-jint JNICALL
-JNI_GetDefaultJavaVMInitArgs(void *args);
+jint JNI_GetDefaultJavaVMInitArgs(void *args);
 
-jint JNICALL
-JNI_CreateJavaVM(JavaVM **pvm, void **penv, void *args);
+jint JNI_CreateJavaVM(JavaVM **pvm, void **penv, void *args);
 
-jint JNICALL
-JNI_GetCreatedJavaVMs(JavaVM **, jsize, jsize *);
+jint JNI_GetCreatedJavaVMs(JavaVM **, jsize, jsize *);
 
 /* Defined by native libraries. */
-jint JNICALL
-JNI_OnLoad(JavaVM *vm, void *reserved);
+jint JNI_OnLoad(JavaVM *vm, void *reserved);
 
-void JNICALL
-JNI_OnUnload(JavaVM *vm, void *reserved);
+void JNI_OnUnload(JavaVM *vm, void *reserved);
