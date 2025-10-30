@@ -31,16 +31,25 @@ tasks.register("cleanMvnRepo") {
 val pluginAndDeps = listOf("shared-internals", "ksp-processor", "plugin")
 
 // Useful for local development and testing
-tasks.register("publishLocal") {
+tasks.register("publishDev") {
     pluginAndDeps.forEach {
-        dependsOn(gradle.includedBuild(it).task(":publishMavenJavaPublicationToLocalRepository"))
+        dependsOn(gradle.includedBuild(it).task(":publishMavenJavaPublicationToDevRepository"))
     }
 }
 
-tasks.register("bundleAllForMavenCentral") {
+tasks.register<Zip>("bundleZipForMavenCentral") {
+    group = "publishing"
+    description = "Zips the locally published Maven repository for manual upload."
+
     pluginAndDeps.forEach {
-        dependsOn(gradle.includedBuild(it).task(":bundleZip"))
+        dependsOn(gradle.includedBuild(it).task(":publishMavenJavaPublicationToBundleRepository"))
     }
+
+    // Zip the contents of the generated Maven repo layout
+    from(layout.buildDirectory.dir("maven-bundle"))
+
+    archiveFileName.set("maven-central-bundle-${project.version}.zip")
+    destinationDirectory.set(layout.buildDirectory.dir("distributions"))
 }
 
 tasks.register("unitTest") {

@@ -44,13 +44,13 @@ publishing {
         // (the automation story between Gradle and Maven Central is... painful)
         maven {
             name = "bundle"
-            url = uri(layout.buildDirectory.dir("maven-bundle"))
+            url = uri(project.projectDir.parentFile.resolve("build/maven-bundle"))
         }
 
         // Useful for local development
         maven {
-            name = "local"
-            url = uri("../build/mvn-repo")
+            name = "dev"
+            url = uri(project.projectDir.parentFile.resolve("build/maven-dev"))
         }
     }
 }
@@ -68,19 +68,6 @@ signing {
     )
 
     sign(publishing.publications["mavenJava"])
-}
-
-tasks.register<Zip>("bundleZip") {
-    group = "publishing"
-    description = "Zips the locally published Maven repository for manual upload."
-
-    dependsOn("publishMavenJavaPublicationToBundleRepository")
-
-    // Zip the contents of the generated Maven repo layout
-    from(layout.buildDirectory.dir("maven-bundle"))
-
-    archiveFileName.set("maven-central-bundle-${project.version}.zip")
-    destinationDirectory.set(layout.buildDirectory.dir("distributions"))
 }
 
 java {
