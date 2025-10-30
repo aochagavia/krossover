@@ -5,4 +5,4 @@ ktlint = "1.7.1"
 run = "ktlint ksp-processor/src plugin/src shared-internals/src build-plugin/src --format"
 
 [tasks.bundle]
-run = "fnox exec -- ./gradlew bundleZipForMavenCentral"
+run = "rm -rf build/maven-bundle && fnox exec -- ./gradlew bundleZipForMavenCentral"
