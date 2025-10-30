@@ -68,8 +68,10 @@ class ClassDeclCollector(
             // Iterate until all relevant classes have been visited
         }
 
-        // Write the metadata to a KSP-managed file (this shouldn't be necessary, but it solved an
-        // issue in which the KSP task would be skipped right after a `gradle clean`)
+        // Write the metadata to a KSP-managed file, to help KSP know we have side-effects that
+        // affect the build directory (otherwise the KSP task could get skipped even after a `gradle
+        // clean`). Note: we are not actually using this file, since the actual path depends on the
+        // build configuration and it's tricky to refer to it from other places.
         val stream = codeGenerator.createNewFile(Dependencies.ALL_FILES, "krossover", "api", "json")
         val writer = stream.writer()
         val metadata = kotlinVisitor.getPackageMetadata()
@@ -77,7 +79,8 @@ class ClassDeclCollector(
         writer.write(json)
         writer.close()
 
-        // Write the metadata again, this time to a file controlled by us
+        // Write the metadata again, this time to a file controlled by us, so other tasks can read
+        // it
         options.apiJsonPath.createParentDirectories()
         options.apiJsonPath.writeText(json)
 
