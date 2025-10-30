@@ -22,6 +22,9 @@ merging pull requests that improve Krossover for usage in other projects (let's 
 just to be sure). I'm also available for krossover-related [consulting](https://ochagavia.nl):
 answering advanced questions, implementing new features, etc.
 
+> [!WARNING]
+> Krossover usage hasn't been merged to KSON main just yet (see the [related PR](https://github.com/kson-org/kson/pull/246)). Until then, Krossover should be considered highly experimental. This notice will be removed once the PR gets merged.
+
 ## Usage
 
 #### Gradle setup
