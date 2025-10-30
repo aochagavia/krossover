@@ -1,0 +1,5 @@
+[tools]
+ktlint = "1.7.1"
+
+[tasks.format]
+run = "ktlint ksp-processor/src plugin/src shared-internals/src build-plugin/src --format"
