@@ -63,8 +63,17 @@ tasks.register("unitTest") {
 tasks.register("functionalTest") {
     group = "verification"
 
-    // Make sure the plugin has been published
-    mustRunAfter("publishLocal")
-    dependsOn("publishLocal")
+    // Make sure the everything has been published
+    dependsOn("publishDev")
     dependsOn(gradle.includedBuild("plugin").task(":functionalTest"))
+}
+
+tasks.register("check") {
+    group = "verification"
+
+    dependsOn("functionalTest")
+
+    pluginAndDeps.forEach {
+        dependsOn(gradle.includedBuild(it).task(":check"))
+    }
 }

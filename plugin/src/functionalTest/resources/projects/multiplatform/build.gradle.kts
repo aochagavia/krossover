@@ -7,7 +7,7 @@ repositories {
     mavenCentral()
     maven {
         val projectRoot = gradle.startParameter.projectProperties["projectRoot"]!!
-        url = uri(file(projectRoot).resolve("../.mvn-repo"))
+        url = uri(file(projectRoot).resolve("../build/maven-dev"))
     }
 }
 
@@ -17,8 +17,20 @@ kotlin {
 }
 
 krossover {
-    rootClasses.set(listOf("com.example.Dummy", "com.example.Object"))
-    packages.set(listOf("com.example"))
-    outputPackageName.set("public-api")
-    fileName.set("api.json")
+    libName = "example"
+    rootClasses = listOf("com.example.Dummy", "com.example.Object")
+    exposedPackages = listOf("com.example")
+
+    jniHeaderOutputFile = project.projectDir
+        .resolve("build/jni/jni_simplified.h")
+        .toPath()
+
+    python {
+        outputDir = project.projectDir.resolve("build/python").toPath()
+    }
+
+    rust {
+        outputDir = project.projectDir.resolve("build/rust").toPath()
+        jniSysModule = "example_sys"
+    }
 }

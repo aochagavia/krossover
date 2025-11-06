@@ -48,6 +48,37 @@ class AllFunctionalTests {
         assertTrue(classPresent, "$className not present in JNI config")
     }
 
+    fun assertExpectedFilesPresent(projectDir: Path, classesInPublicApi: List<String>, classesInJniConfig: List<String>) {
+        // API
+        val expectedApi = projectDir.resolve("build/kotlin/krossover/metadata/api.json")
+        assertTrue(Files.exists(expectedApi), "Expected generated file not found: $expectedApi")
+        val api = Json.decodeFromString(JsonElement.serializer(), expectedApi.readText(Charsets.UTF_8))
+        classesInPublicApi.forEach {
+            assertClassInPublicApi(api, it)
+        }
+
+        // JNI Config
+        val expectedJniConfig = projectDir.resolve("build/kotlin/krossover/metadata/jni-config.json")
+        assertTrue(Files.exists(expectedJniConfig), "Expected generated file not found: $expectedJniConfig")
+        val jniConfig = Json.decodeFromString(JsonElement.serializer(), expectedJniConfig.readText(Charsets.UTF_8))
+        classesInJniConfig.forEach {
+            assertClassInJniConfig(jniConfig, it)
+        }
+
+        // JNI headers
+        val expectedJniHeaders = projectDir.resolve("build/jni/jni_simplified.h")
+        assertTrue(Files.exists(expectedJniHeaders), "Expected generated file not found: $expectedJniHeaders")
+
+        // Bindings
+        val expectedFiles = listOf(
+            projectDir.resolve("build/python/__init__.py"),
+            projectDir.resolve("build/rust/mod.rs"),
+        )
+        expectedFiles.forEach {
+            assertTrue(Files.exists(it), "Expected generated file not found: $it")
+        }
+    }
+
     @Test
     fun dummyBuildProducesExpectedOutput() {
         val tempDir = initializeProject("dummy")
@@ -66,23 +97,15 @@ class AllFunctionalTests {
         assertEquals(TaskOutcome.SUCCESS, gradle.task(":generateJniConfig")?.outcome)
         assertEquals(TaskOutcome.SUCCESS, gradle.task(":generateJniBindings")?.outcome)
 
-        // API
-        val expectedApi = tempDir.resolve("build/generated/ksp/main/resources/public-api/api.json")
-        assertTrue(Files.exists(expectedApi), "Expected generated file not found: $expectedApi")
-        val api = Json.decodeFromString(JsonElement.serializer(), expectedApi.readText(Charsets.UTF_8))
-        assertClassInPublicApi(api, "com.example.Dummy")
-        assertClassInPublicApi(api, "com.example.Object")
-        assertClassInPublicApi(api, "com.example.NestedClass1")
-
-        // JNI Config
-        val expectedJniConfig = tempDir.resolve("build/generated/ksp/main/resources/public-api/jni-config.json")
-        assertTrue(Files.exists(expectedJniConfig), "Expected generated file not found: $expectedJniConfig")
-        val jniConfig = Json.decodeFromString(JsonElement.serializer(), expectedJniConfig.readText(Charsets.UTF_8))
-        assertClassInJniConfig(jniConfig, $$"com.example.Dummy$NestedDummy")
-
-        // Python bindings
-        val expectedPythonFile = tempDir.resolve("build/generated/ksp/main/resources/public-api/main.py")
-        assertTrue(Files.exists(expectedPythonFile), "Expected generated file not found: $expectedJniConfig")
+        val classesInPublicApi = listOf(
+            "com.example.Dummy",
+            "com.example.Object",
+            "com.example.NestedClass1",
+        )
+        val classesInJniConfig = listOf(
+            $$"com.example.Dummy$NestedDummy"
+        )
+        assertExpectedFilesPresent(tempDir, classesInPublicApi, classesInJniConfig)
     }
 
     @Test
@@ -95,19 +118,22 @@ class AllFunctionalTests {
             GradleRunner
                 .create()
                 .withProjectDir(tempDir.toFile())
-                .withArguments("clean", "generateJniConfigJvm", "--info", "-PprojectRoot=$projectRoot")
+                .withArguments("clean", "generateJniConfigJvm", "generateJniBindingsJvm", "--info", "-PprojectRoot=$projectRoot")
                 .withPluginClasspath()
                 .forwardOutput()
                 .build()
 
         assertEquals(TaskOutcome.SUCCESS, gradle.task(":generateJniConfigJvm")?.outcome)
+        assertEquals(TaskOutcome.SUCCESS, gradle.task(":generateJniBindingsJvm")?.outcome)
 
-        val expected = tempDir.resolve("build/generated/ksp/jvm/jvmMain/resources/public-api/api.json")
-        assertTrue(Files.exists(expected), "Expected generated file not found: $expected")
-
-        val api = Json.decodeFromString(JsonElement.serializer(), expected.readText(Charsets.UTF_8))
-        assertClassInPublicApi(api, "com.example.Dummy")
-        assertClassInPublicApi(api, "com.example.Object")
-        assertClassInPublicApi(api, "com.example.NestedClass1")
+        val classesInPublicApi = listOf(
+            "com.example.Dummy",
+            "com.example.Object",
+            "com.example.NestedClass1",
+        )
+        val classesInJniConfig = listOf(
+            $$"com.example.DoublyNestedClass"
+        )
+        assertExpectedFilesPresent(tempDir, classesInPublicApi, classesInJniConfig)
     }
 }
