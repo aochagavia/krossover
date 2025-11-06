@@ -19,8 +19,7 @@ language you are interested in) and to ask questions in the KSON Zulip (check ou
 [#krossover](https://kson-org.zulipchat.com/#narrow/channel/540263-krossover) channel). Note that I
 intend to prioritize features that are useful for KSON, but I'm nevertheless open to reviewing and
 merging pull requests that improve Krossover for usage in other projects (let's discuss beforehand,
-just to be sure). I'm also available for krossover-related [consulting](https://ochagavia.nl):
-answering advanced questions, implementing new features, etc.
+just to be sure). I'm also available for krossover-related [consulting](https://ochagavia.nl).
 
 > [!WARNING]
 > Krossover usage hasn't been merged to KSON main just yet (see the [related PR](https://github.com/kson-org/kson/pull/246)). Until then, Krossover should be considered highly experimental. This notice will be removed once the PR gets merged.
@@ -29,11 +28,21 @@ answering advanced questions, implementing new features, etc.
 
 #### Gradle setup
 
-Add the plugin to your Gradle build:
+Add the plugin to your Gradle build (`build.gradle.kts`):
 
 ```kotlin
 plugins {
     id("nl.ochagavia.krossover") version "<desired-version>"
+}
+```
+
+Ensure Gradle can find plugins from Maven Central (`settings.gradle.kts`):
+
+```kotlin
+pluginManagement {
+    repositories {
+        mavenCentral()
+    }
 }
 ```
 
@@ -96,7 +105,17 @@ repository](https://github.com/kson-org/kson/) for a real-world project that use
 free to [ask questions on Zulip](https://kson-org.zulipchat.com/#narrow/channel/540263-krossover) as
 well.
 
-## Project structure
+## Development
+
+#### Getting started
+
+As mentioned above, it's very early days and documentation is sparse. If you are looking to
+contribute, you can count on me answering any questions you might have. Hopefully, those answers can
+later become part of the official Krossover documentation, so other contributors have an easier time
+diving into the codebase. You can find me on the [KSON
+Zulip](https://kson-org.zulipchat.com/#narrow/channel/540263-krossover).
+
+#### Project structure
 
 Krossover has the following components, each living in its own subproject:
 
@@ -105,7 +124,14 @@ Krossover has the following components, each living in its own subproject:
   languages. Provides a Gradle plugin so you can easily use Krossover from a Gradle project.
 - `shared-internals`: data types used both in `ksp-processor` and `plugin`.
 
-## Ideas for the future
+#### Testing
+
+Currently, out automated tests (i.e. `./gradlew check`) only exercise basic functionality. We are
+leaning heavily on the tests inside the KSON project to ensure the generated wrappers are actually
+correct (we run those manually against development versions of Krossover). If / when this project
+gains more users, we expect to develop a more comprehensive test suite.
+
+#### Ideas for the future
 
 - Provide more information on how to use GralVM to compile Kotlin projects.
 - Support third-party language providers. Currently, the only way to add support for a new language
