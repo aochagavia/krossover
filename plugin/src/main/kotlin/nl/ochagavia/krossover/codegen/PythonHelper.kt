@@ -32,45 +32,67 @@ object PythonHelper {
         publicApi: PublicApi,
         param: KotlinFunctionParam,
     ): String {
+        val name = param.name
+
         if (publicApi.enums.containsKey(param.type.name)) {
-            return "${param.name}._to_kotlin_enum()"
+            return if (param.type.isNullable) {
+                "$name._to_kotlin_enum() if $name is not None else ffi.NULL"
+            } else {
+                "$name._to_kotlin_enum()"
+            }
         }
 
         val primitive = JniHelper.toJniPrimitive(param.type)
         if (primitive != null) {
-            return "ffi.cast('$primitive', ${param.name})"
+            // Nullable primitives would need boxing, but that's not currently supported
+            return "ffi.cast('$primitive', $name)"
         }
 
-        return when (param.type.name) {
-            ClassName.string -> "_python_str_to_java_string(${param.name})"
-            ClassName.list -> "_to_kotlin_list(${param.name})"
-            ClassName.map -> "_to_kotlin_map(${param.name})"
-            else -> "${param.name}._jni_ref"
+        val conversion =
+            when (param.type.name) {
+                ClassName.string -> "_python_str_to_java_string($name)"
+                ClassName.list -> "_to_kotlin_list($name)"
+                ClassName.map -> "_to_kotlin_map($name)"
+                else -> "$name._jni_ref"
+            }
+
+        return if (param.type.isNullable) {
+            "$conversion if $name is not None else ffi.NULL"
+        } else {
+            conversion
         }
     }
 
     @JvmStatic
-    fun typeAnnotation(type: KotlinType): String =
-        when (type.name) {
-            // Primitives
-            ClassName.int,
-            ClassName.long,
-            ClassName.byte,
-            ClassName.char,
-            ClassName.short,
-            -> "int"
-            ClassName.boolean -> "bool"
-            ClassName.float,
-            ClassName.double,
-            -> "float"
-            // Built-ins and collections
-            ClassName.string -> "str"
-            ClassName.any -> "Any"
-            ClassName.list -> "List[${typeParamAnnotation(type, 0)}]"
-            ClassName.map -> "Dict[${typeParamAnnotation(type, 0)}, ${typeParamAnnotation(type, 1)}]"
-            // We consider anything else to be user-defined
-            else -> classDefName(type.name)
+    fun typeAnnotation(type: KotlinType): String {
+        val baseType =
+            when (type.name) {
+                // Primitives
+                ClassName.int,
+                ClassName.long,
+                ClassName.byte,
+                ClassName.char,
+                ClassName.short,
+                -> "int"
+                ClassName.boolean -> "bool"
+                ClassName.float,
+                ClassName.double,
+                -> "float"
+                // Built-ins and collections
+                ClassName.string -> "str"
+                ClassName.any -> "Any"
+                ClassName.list -> "List[${typeParamAnnotation(type, 0)}]"
+                ClassName.map -> "Dict[${typeParamAnnotation(type, 0)}, ${typeParamAnnotation(type, 1)}]"
+                // We consider anything else to be user-defined
+                else -> classDefName(type.name)
+            }
+
+        return if (type.isNullable) {
+            "Optional[$baseType]"
+        } else {
+            baseType
         }
+    }
 
     private fun typeParamAnnotation(
         type: KotlinType,
@@ -106,8 +128,17 @@ object PythonHelper {
     ): String {
         val lambdaParam = "x$nesting"
         val className = type.name.unqualifiedNameWithNesting(".")
+
+        // For nullable types, wrap the conversion to check for null first
+        fun wrapNullable(conversion: String): String =
+            if (type.isNullable) {
+                "lambda $lambdaParam: None if $lambdaParam == ffi.NULL else ($conversion)($lambdaParam)"
+            } else {
+                conversion
+            }
+
         if (publicApi.enums.containsKey(type.name)) {
-            return "lambda $lambdaParam: $className._from_kotlin_enum($lambdaParam)"
+            return wrapNullable("lambda $lambdaParam: $className._from_kotlin_enum($lambdaParam)")
         }
 
         if (JniHelper.toJniPrimitive(type) != null) {
@@ -115,33 +146,36 @@ object PythonHelper {
             return "lambda $lambdaParam: $lambdaParam"
         }
 
-        return when (type.name) {
-            ClassName.string -> "_java_string_to_python_str"
-            ClassName.map -> {
-                if (type.params.size != 2) {
-                    "lambda $lambdaParam: raise NotImplementedError"
-                } else {
-                    val keyConversion = fromKotlinConversionFn(publicApi, type.params[0], nesting + 1)
-                    val valueConversion = fromKotlinConversionFn(publicApi, type.params[1], nesting + 1)
-                    "lambda $lambdaParam: _from_kotlin_map($lambdaParam, $keyConversion, $valueConversion)"
+        val baseConversion =
+            when (type.name) {
+                ClassName.string -> "_java_string_to_python_str"
+                ClassName.map -> {
+                    if (type.params.size != 2) {
+                        "lambda $lambdaParam: raise NotImplementedError"
+                    } else {
+                        val keyConversion = fromKotlinConversionFn(publicApi, type.params[0], nesting + 1)
+                        val valueConversion = fromKotlinConversionFn(publicApi, type.params[1], nesting + 1)
+                        "lambda $lambdaParam: _from_kotlin_map($lambdaParam, $keyConversion, $valueConversion)"
+                    }
+                }
+                ClassName.list -> {
+                    if (type.params.isEmpty()) {
+                        "lambda $lambdaParam: raise NotImplementedError"
+                    } else {
+                        val itemConversion = fromKotlinConversionFn(publicApi, type.params[0], nesting + 1)
+                        "lambda $lambdaParam: _from_kotlin_list($lambdaParam, $itemConversion)"
+                    }
+                }
+                else -> {
+                    if (publicApi.classHierarchy.hasChildren(type.name)) {
+                        "lambda $lambdaParam: $className._downcast($lambdaParam)"
+                    } else {
+                        "lambda $lambdaParam: _from_kotlin_object($className, $lambdaParam)"
+                    }
                 }
             }
-            ClassName.list -> {
-                if (type.params.isEmpty()) {
-                    "lambda $lambdaParam: raise NotImplementedError"
-                } else {
-                    val itemConversion = fromKotlinConversionFn(publicApi, type.params[0], nesting + 1)
-                    "lambda $lambdaParam: _from_kotlin_list($lambdaParam, $itemConversion)"
-                }
-            }
-            else -> {
-                if (publicApi.classHierarchy.hasChildren(type.name)) {
-                    "lambda $lambdaParam: $className._downcast($lambdaParam)"
-                } else {
-                    "lambda $lambdaParam: _from_kotlin_object($className, $lambdaParam)"
-                }
-            }
-        }
+
+        return wrapNullable(baseConversion)
     }
 
     @JvmStatic

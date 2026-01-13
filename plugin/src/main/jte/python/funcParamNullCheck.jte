@@ -4,6 +4,8 @@
 
 @param List<KotlinFunctionParam> funcParams
 @for(var param : funcParams)
+@if(!param.getType().isNullable())
 if ${IdentHelper.snakeCase(param.getName())} is None:
     raise ValueError("`${IdentHelper.snakeCase(param.getName())}` cannot be None")
+@endif
 @endfor
