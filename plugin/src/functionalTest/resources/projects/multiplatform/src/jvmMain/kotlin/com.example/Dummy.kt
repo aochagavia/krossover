@@ -2,6 +2,10 @@ package com.example
 
 class Dummy {
     fun foo(): NestedClass1 = NestedClass1()
+
+    fun processList(items: List<NestedClass1>): Int {
+        return items.size
+    }
 }
 
 class NestedClass1
@@ -12,6 +16,10 @@ object Object {
 
 class NestedClass2 {
     fun foo(x: DoublyNestedClass) {
+    }
+
+    fun processItems(items: List<DoublyNestedClass>): Int {
+        return items.size
     }
 }
 

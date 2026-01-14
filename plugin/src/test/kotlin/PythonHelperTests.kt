@@ -10,6 +10,24 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class PythonHelperTests {
+    private fun emptyKotlinLibrary(): KotlinLibrary = KotlinLibrary(
+        classes = hashMapOf(),
+        enums = hashMapOf(),
+        nestedClasses = hashMapOf(),
+        sealedSubclasses = hashSetOf(),
+        externalTypes = emptyList(),
+    )
+
+    private fun emptyPublicApi(): PublicApi = PublicApi(
+        classes = hashMapOf(),
+        sealedSubclasses = hashSetOf(),
+        enums = hashMapOf(),
+        nestedClasses = hashMapOf(),
+        classHierarchy = ClassHierarchy(emptyKotlinLibrary()),
+        libName = "test",
+        rustConfig = RustConfig("test_sys", emptyMap()),
+    )
+
     @Test
     fun testNestedClassDefName() {
         val class1 = ClassName.notNested("com.example.Outer\$Inner")
@@ -64,27 +82,7 @@ class PythonHelperTests {
         assertEquals("", PythonHelper.returnTypeAnnotation(type))
     }
 
-    // Helper to create empty PublicApi for tests
-    private fun emptyPublicApi(): PublicApi {
-        val emptyLibrary = KotlinLibrary(
-            classes = hashMapOf(),
-            enums = hashMapOf(),
-            nestedClasses = hashMapOf(),
-            sealedSubclasses = hashSetOf(),
-            externalTypes = emptyList()
-        )
-        return PublicApi(
-            classes = hashMapOf(),
-            sealedSubclasses = hashSetOf(),
-            enums = hashMapOf(),
-            nestedClasses = hashMapOf(),
-            classHierarchy = ClassHierarchy(emptyLibrary),
-            libName = "test",
-            rustConfig = RustConfig("test_sys", emptyMap())
-        )
-    }
-
-    // Tests for castParam with nullable types
+    // Tests for castParam
     @Test
     fun testCastParamNonNullableString() {
         val param = KotlinFunctionParam("myParam", KotlinType(ClassName.string, isNullable = false))
@@ -113,6 +111,14 @@ class PythonHelperTests {
             "myParam._jni_ref if myParam is not None else ffi.NULL",
             PythonHelper.castParam(emptyPublicApi(), param)
         )
+    }
+
+    @Test
+    fun testCastParamNonNullableList() {
+        val itemType = KotlinType(ClassName.notNested("com.example.Item"), isNullable = false)
+        val listType = KotlinType(ClassName.list, isNullable = false, params = listOf(itemType))
+        val param = KotlinFunctionParam("items", listType)
+        assertEquals("_to_kotlin_list(items)", PythonHelper.castParam(emptyPublicApi(), param))
     }
 
     @Test
