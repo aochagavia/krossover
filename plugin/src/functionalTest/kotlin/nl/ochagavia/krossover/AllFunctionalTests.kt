@@ -79,6 +79,23 @@ class AllFunctionalTests {
         }
     }
 
+    fun assertPythonNullCheckForNonNullableOnly(projectDir: Path) {
+        val pythonFile = projectDir.resolve("build/python/__init__.py")
+        val content = pythonFile.readText(Charsets.UTF_8)
+
+        // Non-nullable param should have null check
+        assertTrue(
+            content.contains("`required` cannot be None"),
+            "Expected null check for non-nullable param 'required'"
+        )
+
+        // Nullable param should NOT have null check
+        assertTrue(
+            !content.contains("`optional` cannot be None"),
+            "Nullable param 'optional' should not have null check"
+        )
+    }
+
     @Test
     fun dummyBuildProducesExpectedOutput() {
         val tempDir = initializeProject("dummy")
@@ -106,6 +123,7 @@ class AllFunctionalTests {
             $$"com.example.Dummy$NestedDummy"
         )
         assertExpectedFilesPresent(tempDir, classesInPublicApi, classesInJniConfig)
+        assertPythonNullCheckForNonNullableOnly(tempDir)
     }
 
     @Test

@@ -63,12 +63,16 @@ object RustHelper {
     @JvmStatic
     fun castParamToObject(param: KotlinFunctionParam): String {
         if (param.type.name == ClassName.boolean) {
-            return "let ${param.name} = ${param.name} as c_int;"
+            return if (param.type.isNullable) {
+                "let ${param.name} = ${param.name}.map(|v| v as c_int);"
+            } else {
+                "let ${param.name} = ${param.name} as c_int;"
+            }
         }
 
         val primitive = JniHelper.toJniPrimitive(param.type)
         if (primitive != null) {
-            // No casting is necessary for primitives
+            // No casting is necessary for primitives (they are non-nullable)
             return ""
         }
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import sys
 import threading
-from typing import cast, Any, Callable, Dict, List, Type, TypeAlias
+from typing import cast, Any, Callable, Dict, List, Optional, Type, TypeAlias
 from cffi import FFI
 from pathlib import Path
 from enum import Enum

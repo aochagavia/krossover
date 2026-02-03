@@ -3,6 +3,8 @@ package com.example
 class Dummy {
     fun foo(): NestedClass1 = NestedClass1()
 
+    fun withNullableParam(required: String, optional: String?): String = required + (optional ?: "")
+
     class NestedDummy
 }
 
