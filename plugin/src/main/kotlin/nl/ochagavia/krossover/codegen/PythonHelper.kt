@@ -44,7 +44,7 @@ object PythonHelper {
 
         val primitive = JniHelper.toJniPrimitive(param.type)
         if (primitive != null) {
-            // Nullable primitives would need boxing, but that's not currently supported
+            // No casting is necessary for primitives (they are non-nullable)
             return "ffi.cast('$primitive', $name)"
         }
 
@@ -129,8 +129,8 @@ object PythonHelper {
         val lambdaParam = "x$nesting"
         val className = type.name.unqualifiedNameWithNesting(".")
 
-        // For nullable types, wrap the conversion to check for null first
-        fun wrapNullable(conversion: String): String =
+        // For nullable types, check for null before converting
+        fun nullSafeConversion(conversion: String): String =
             if (type.isNullable) {
                 "lambda $lambdaParam: None if $lambdaParam == ffi.NULL else ($conversion)($lambdaParam)"
             } else {
@@ -138,7 +138,7 @@ object PythonHelper {
             }
 
         if (publicApi.enums.containsKey(type.name)) {
-            return wrapNullable("lambda $lambdaParam: $className._from_kotlin_enum($lambdaParam)")
+            return nullSafeConversion("lambda $lambdaParam: $className._from_kotlin_enum($lambdaParam)")
         }
 
         if (JniHelper.toJniPrimitive(type) != null) {
@@ -175,7 +175,7 @@ object PythonHelper {
                 }
             }
 
-        return wrapNullable(baseConversion)
+        return nullSafeConversion(baseConversion)
     }
 
     @JvmStatic

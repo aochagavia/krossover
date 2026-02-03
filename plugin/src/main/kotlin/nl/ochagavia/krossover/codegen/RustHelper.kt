@@ -74,8 +74,7 @@ object RustHelper {
 
         val primitive = JniHelper.toJniPrimitive(param.type)
         if (primitive != null) {
-            // No casting is necessary for non-nullable primitives
-            // Nullable primitives would need boxing, but that's not currently supported
+            // No casting is necessary for primitives (they are non-nullable)
             return ""
         }
 
