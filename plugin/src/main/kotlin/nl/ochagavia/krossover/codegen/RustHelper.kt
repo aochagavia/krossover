@@ -62,13 +62,11 @@ object RustHelper {
 
     @JvmStatic
     fun castParamToObject(param: KotlinFunctionParam): String {
-        val name = param.name
-
         if (param.type.name == ClassName.boolean) {
             return if (param.type.isNullable) {
-                "let $name = $name.map(|v| v as c_int);"
+                "let ${param.name} = ${param.name}.map(|v| v as c_int);"
             } else {
-                "let $name = $name as c_int;"
+                "let ${param.name} = ${param.name} as c_int;"
             }
         }
 
@@ -78,27 +76,16 @@ object RustHelper {
             return ""
         }
 
-        if (param.type.isNullable) {
-            val innerExpr =
-                when (param.type.name) {
-                    ClassName.string -> "v.to_kotlin_object()"
-                    ClassName.list -> "util::to_kotlin_list(v)"
-                    ClassName.map -> "util::to_kotlin_map(v)"
-                    // User-defined
-                    else -> "v.to_kotlin_object()"
-                }
-            return "let ${name}_ptr = $name.map(|v| $innerExpr);\nlet $name = ${name}_ptr.as_ref().map(|p| p.as_kotlin_object()).unwrap_or(std::ptr::null_mut());"
-        } else {
-            val expr =
-                when (param.type.name) {
-                    ClassName.string -> "$name.to_kotlin_object()"
-                    ClassName.list -> "util::to_kotlin_list($name)"
-                    ClassName.map -> "util::to_kotlin_map($name)"
-                    // User-defined
-                    else -> "$name.to_kotlin_object()"
-                }
-            return "let ${name}_ptr = $expr;\nlet $name = ${name}_ptr.as_kotlin_object();"
-        }
+        val expr =
+            when (param.type.name) {
+                ClassName.string -> "${param.name}.to_kotlin_object()"
+                ClassName.list -> "util::to_kotlin_list(${param.name})"
+                ClassName.map -> "util::to_kotlin_map(${param.name})"
+                // User-defined
+                else -> "${param.name}.to_kotlin_object()"
+            }
+
+        return "let ${param.name}_ptr = $expr;\nlet ${param.name} = ${param.name}_ptr.as_kotlin_object();"
     }
 
     @JvmStatic

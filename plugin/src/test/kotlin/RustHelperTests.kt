@@ -72,7 +72,7 @@ class RustHelperTests {
         val param = KotlinFunctionParam("myParam", KotlinType(ClassName.string, isNullable = true))
         val result = RustHelper.castParamToObject(param)
         assertEquals(
-            "let myParam_ptr = myParam.map(|v| v.to_kotlin_object());\nlet myParam = myParam_ptr.as_ref().map(|p| p.as_kotlin_object()).unwrap_or(std::ptr::null_mut());",
+            "let myParam_ptr = myParam.to_kotlin_object();\nlet myParam = myParam_ptr.as_kotlin_object();",
             result
         )
     }
@@ -92,7 +92,7 @@ class RustHelperTests {
         val param = KotlinFunctionParam("myParam", KotlinType(ClassName.notNested("com.example.MyClass"), isNullable = true))
         val result = RustHelper.castParamToObject(param)
         assertEquals(
-            "let myParam_ptr = myParam.map(|v| v.to_kotlin_object());\nlet myParam = myParam_ptr.as_ref().map(|p| p.as_kotlin_object()).unwrap_or(std::ptr::null_mut());",
+            "let myParam_ptr = myParam.to_kotlin_object();\nlet myParam = myParam_ptr.as_kotlin_object();",
             result
         )
     }
@@ -103,7 +103,7 @@ class RustHelperTests {
         val param = KotlinFunctionParam("myParam", KotlinType(ClassName.list, isNullable = true, params = listOf(innerType)))
         val result = RustHelper.castParamToObject(param)
         assertEquals(
-            "let myParam_ptr = myParam.map(|v| util::to_kotlin_list(v));\nlet myParam = myParam_ptr.as_ref().map(|p| p.as_kotlin_object()).unwrap_or(std::ptr::null_mut());",
+            "let myParam_ptr = util::to_kotlin_list(myParam);\nlet myParam = myParam_ptr.as_kotlin_object();",
             result
         )
     }
@@ -115,7 +115,7 @@ class RustHelperTests {
         val param = KotlinFunctionParam("myParam", KotlinType(ClassName.map, isNullable = true, params = listOf(keyType, valueType)))
         val result = RustHelper.castParamToObject(param)
         assertEquals(
-            "let myParam_ptr = myParam.map(|v| util::to_kotlin_map(v));\nlet myParam = myParam_ptr.as_ref().map(|p| p.as_kotlin_object()).unwrap_or(std::ptr::null_mut());",
+            "let myParam_ptr = util::to_kotlin_map(myParam);\nlet myParam = myParam_ptr.as_kotlin_object();",
             result
         )
     }

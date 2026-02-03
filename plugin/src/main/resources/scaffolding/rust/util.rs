@@ -294,6 +294,19 @@ impl<T: ToKotlinObject> ToKotlinObject for &T {
     }
 }
 
+impl<T: ToKotlinObject> ToKotlinObject for Option<T> {
+    fn to_kotlin_object(&self) -> KotlinPtr {
+        match self {
+            None => KotlinPtr {
+                inner: Arc::new(OwnedKotlinPtr {
+                    inner: std::ptr::null_mut(),
+                })
+            },
+            Some(v) => v.to_kotlin_object()
+        }
+    }
+}
+
 pub(super) trait AsKotlinObject {
     fn as_kotlin_object(&self) -> jobject;
 }
