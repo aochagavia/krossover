@@ -56,7 +56,7 @@ class RustHelperTests {
         assertEquals("Option<&[&str]>", RustHelper.paramType(type))
     }
 
-    // Tests for castParamToObject with nullable types
+    // Tests for castParamToObject
     @Test
     fun testCastParamToObjectNonNullableString() {
         val param = KotlinFunctionParam("myParam", KotlinType(ClassName.string, isNullable = false))
@@ -98,6 +98,15 @@ class RustHelperTests {
     }
 
     @Test
+    fun testCastParamToObjectNonNullableList() {
+        val itemType = KotlinType(ClassName.notNested("com.example.Item"), isNullable = false)
+        val listType = KotlinType(ClassName.list, isNullable = false, params = listOf(itemType))
+        val param = KotlinFunctionParam("items", listType)
+        val expected = "let items_ptr = util::to_kotlin_list(items);\nlet items = items_ptr.as_kotlin_object();"
+        assertEquals(expected, RustHelper.castParamToObject(param))
+    }
+
+    @Test
     fun testCastParamToObjectNullableList() {
         val innerType = KotlinType(ClassName.string, isNullable = false)
         val param = KotlinFunctionParam("myParam", KotlinType(ClassName.list, isNullable = true, params = listOf(innerType)))
@@ -112,7 +121,10 @@ class RustHelperTests {
     fun testCastParamToObjectNullableMap() {
         val keyType = KotlinType(ClassName.string, isNullable = false)
         val valueType = KotlinType(ClassName.int, isNullable = false)
-        val param = KotlinFunctionParam("myParam", KotlinType(ClassName.map, isNullable = true, params = listOf(keyType, valueType)))
+        val param = KotlinFunctionParam(
+            "myParam",
+            KotlinType(ClassName.map, isNullable = true, params = listOf(keyType, valueType))
+        )
         val result = RustHelper.castParamToObject(param)
         assertEquals(
             "let myParam_ptr = util::to_kotlin_map(myParam);\nlet myParam = myParam_ptr.as_kotlin_object();",

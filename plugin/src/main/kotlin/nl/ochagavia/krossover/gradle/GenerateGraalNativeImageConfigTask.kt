@@ -31,6 +31,7 @@ abstract class GenerateGraalNativeImageConfigTask : DefaultTask() {
         val requiredJavaClasses =
             listOf(
                 "java.lang.Class",
+                "java.util.ArrayList", // Necessary to create lists
                 "java.util.List",
                 "java.util.Map",
                 "java.util.Iterator", // Necessary to iterate through maps and lists

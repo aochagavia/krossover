@@ -120,7 +120,8 @@ class AllFunctionalTests {
             "com.example.NestedClass1",
         )
         val classesInJniConfig = listOf(
-            $$"com.example.Dummy$NestedDummy"
+            $$"com.example.Dummy$NestedDummy",
+            "java.util.ArrayList",
         )
         assertExpectedFilesPresent(tempDir, classesInPublicApi, classesInJniConfig)
         assertPythonNullCheckForNonNullableOnly(tempDir)
@@ -150,7 +151,8 @@ class AllFunctionalTests {
             "com.example.NestedClass1",
         )
         val classesInJniConfig = listOf(
-            $$"com.example.DoublyNestedClass"
+            $$"com.example.DoublyNestedClass",
+            "java.util.ArrayList",
         )
         assertExpectedFilesPresent(tempDir, classesInPublicApi, classesInJniConfig)
     }
