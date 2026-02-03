@@ -1,4 +1,5 @@
 [tools]
+fnox = "latest"
 ktlint = "1.7.1"
 
 [tasks.format]
