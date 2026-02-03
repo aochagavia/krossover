@@ -37,6 +37,12 @@ tasks.register("publishDev") {
     }
 }
 
+tasks.register("publishToMavenLocal") {
+    pluginAndDeps.forEach {
+        dependsOn(gradle.includedBuild(it).task(":publishToMavenLocal"))
+    }
+}
+
 tasks.register<Zip>("bundleZipForMavenCentral") {
     group = "publishing"
     description = "Zips the locally published Maven repository for manual upload."
