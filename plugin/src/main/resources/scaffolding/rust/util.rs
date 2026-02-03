@@ -19,6 +19,10 @@ pub struct OwnedKotlinPtr {
 
 impl Drop for OwnedKotlinPtr {
     fn drop(&mut self) {
+        if self.inner.is_null() {
+            return;
+        }
+
         let (env, _detach_guard) = attach_thread_to_java_vm();
         unsafe {
             let delete = (**env).DeleteGlobalRef.unwrap();
