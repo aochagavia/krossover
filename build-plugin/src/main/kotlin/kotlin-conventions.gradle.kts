@@ -76,7 +76,7 @@ java {
 
 // Configure artifact
 group = "nl.ochagavia.krossover"
-version = "1.0.4-SNAPSHOT"
+version = "1.0.5"
 
 // Configure java version
 val javaVersion = "11"
