@@ -36,6 +36,7 @@ class KotlinClass(
     val docString: String?,
 ) {
     fun isSealed(): Boolean = sealedSubclasses.isNotEmpty()
+    fun isObjectWithFakeConstructor(): Boolean = kind == KotlinClassKind.OBJECT && superclass != null
 }
 
 @Serializable

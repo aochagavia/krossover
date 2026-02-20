@@ -1,5 +1,11 @@
 package com.example
 
+sealed class MyOptional {
+    class Something(val value: Any) : MyOptional()
+
+    data object Nothing : MyOptional()
+}
+
 class Dummy {
     fun foo(): NestedClass1 = NestedClass1()
 

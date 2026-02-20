@@ -54,6 +54,13 @@ ${new IndentedContent(@`@template.rust.funcCallParams(functionParams = construct
         }
     }
     @endfor
+
+    @if(clazz.isObjectWithFakeConstructor())
+    pub fn new() -> Self {
+        let kotlin_ptr = util::access_static_field(c"${clazz.getName().fullyQualifiedJniName()}", c"INSTANCE", c"L${clazz.getName().fullyQualifiedJniName()};");
+        Self { kotlin_ptr }
+    }
+    @endif
 }
 
 @template.rust.structOrEnumImpls(publicApi = publicApi, clazz = clazz)

@@ -32,6 +32,11 @@ ${new IndentedContent(@`@template.python.funcCallParams(publicApi = publicApi, f
         )
     @endfor
 
+    @if(clazz.isObjectWithFakeConstructor())
+    def __init__(self):
+        self._jni_ref = _access_static_field(b"${clazz.getName().fullyQualifiedJniName()}", b"INSTANCE", b"L${clazz.getName().fullyQualifiedJniName()};")
+    @endif
+
     def __eq__(self, other):
         return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
 

@@ -13,7 +13,7 @@ repositories {
 
 krossover {
     libName = "example"
-    rootClasses = listOf("com.example.Dummy", "com.example.Object")
+    rootClasses = listOf("com.example.Dummy", "com.example.Object", "com.example.MyOptional")
     exposedPackages = listOf("com.example")
 
     jniHeaderOutputFile = project.projectDir
