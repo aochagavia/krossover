@@ -11,7 +11,6 @@ from pathlib import Path
 from enum import Enum
 
 tls = threading.local()
-tls.attached_jni_thread = None
 
 JNI_OK = 0
 
@@ -65,7 +64,7 @@ jvm = ffi.gc(jvm_ptr[0], lambda x: x[0].DestroyJavaVM(x))
 ###############
 
 def _attach_jni_thread() -> Any:
-    if tls.attached_jni_thread:
+    if getattr(tls, 'attached_jni_thread', None):
         return tls.attached_jni_thread
 
     env_ptr = ffi.new("JNIEnv **")
@@ -84,7 +83,7 @@ def _delete_local_ref(env, jni_ref: Any):
     env[0].DeleteLocalRef(env, ffi.cast("jobject", jni_ref))
 
 def _delete_global_ref(jni_ref):
-    should_detach = tls.attached_jni_thread is None
+    should_detach = getattr(tls, 'attached_jni_thread', None) is None
     env = _attach_jni_thread()
     env[0].DeleteGlobalRef(env, ffi.cast("jobject", jni_ref))
     if should_detach:
