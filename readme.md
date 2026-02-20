@@ -19,7 +19,7 @@ language you are interested in) and to ask questions in the KSON Zulip (check ou
 [#krossover](https://kson-org.zulipchat.com/#narrow/channel/540263-krossover) channel). Note that I
 intend to prioritize features that are useful for KSON, but I'm nevertheless open to reviewing and
 merging pull requests that improve Krossover for usage in other projects (let's discuss beforehand,
-just to be sure). I'm also available for krossover-related [consulting](https://ochagavia.nl).
+just to be sure).
 
 ## Usage
 
