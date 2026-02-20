@@ -84,6 +84,12 @@ class PackageMetadataVisitor {
             return true
         }
 
+        // Companion objects have their functions directly embedded in their corresponding class,
+        // so they need no additional handling here
+        if (classDecl.isCompanionObject) {
+            return true
+        }
+
         val className = ClassName.potentiallyNested(classDecl.packageName.asString(), classDecl.qualifiedName!!.asString())
         if (this.classes.containsKey(className) || this.enums.containsKey(className)) {
             // Already handled, move on to the next one
@@ -112,9 +118,12 @@ class PackageMetadataVisitor {
         val constructors = arrayListOf<KotlinConstructor>()
         val functions = arrayListOf<KotlinFunction>()
         val properties = arrayListOf<KotlinProperty>()
+        var companionObjectName: ClassName? = null
         classDecl.declarations.forEach {
             if (it is KSClassDeclaration) {
                 if (it.isCompanionObject) {
+                    companionObjectName = ClassName.potentiallyNested(it.packageName.asString(), it.qualifiedName!!.asString())
+
                     // Static functions
                     it.getDeclaredFunctions().forEach { fnDecl ->
                         if (fnDecl.simpleName.asString() != "<init>") {
@@ -128,7 +137,7 @@ class PackageMetadataVisitor {
             }
 
             // Public functions
-            if (it is KSFunctionDeclaration && it.getVisibility() == Visibility.PUBLIC) {
+            if (it is KSFunctionDeclaration && !it.isAbstract && it.getVisibility() == Visibility.PUBLIC) {
                 if (it.isConstructor()) {
                     // Objects also have constructors, but those aren't exposed in the FFI (objects are singletons, so
                     // creation is handled by kotlin itself)
@@ -173,6 +182,20 @@ class PackageMetadataVisitor {
                 properties.add(KotlinProperty(it.simpleName.asString(), getter))
                 this.visitType(type)
             }
+        }
+
+        // Register a companion object, if we discovered one
+        if (companionObjectName != null) {
+            this.classes[companionObjectName] = KotlinClass(
+                KotlinClassKind.OBJECT,
+                companionObjectName,
+                emptyArray(),
+                null,
+                emptyArray(),
+                emptyArray(),
+                emptyArray(),
+                null
+            )
         }
 
         when (classDecl.classKind) {

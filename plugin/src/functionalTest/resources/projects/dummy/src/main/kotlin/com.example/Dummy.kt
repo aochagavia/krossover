@@ -1,5 +1,11 @@
 package com.example
 
+sealed class MyOptional {
+    class Something(val value: Any) : MyOptional()
+
+    data object Nothing : MyOptional()
+}
+
 class Dummy {
     fun foo(): NestedClass1 = NestedClass1()
 
@@ -10,6 +16,12 @@ class Dummy {
     fun withNullableParam(required: String, optional: String?): String = required + (optional ?: "")
 
     class NestedDummy
+
+    companion object {
+        fun callMeMaybe() {
+
+        }
+    }
 }
 
 class NestedClass1

@@ -108,6 +108,7 @@ class AllFunctionalTests {
                 .withProjectDir(tempDir.toFile())
                 .withArguments("clean", "generateJniConfig", "generateJniBindings", "--info", "-PprojectRoot=$projectRoot")
                 .withPluginClasspath()
+                .withDebug(true)
                 .forwardOutput()
                 .build()
 
