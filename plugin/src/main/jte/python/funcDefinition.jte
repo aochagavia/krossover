@@ -31,13 +31,13 @@ ${PythonHelper.formatDocString("    ", function.getDocString())}
 <%--Function body--%>
 ${new IndentedContent(@`@template.python.funcParamNullCheck(funcParams = function.getParams())`)}
     @if(function.isStatic())
-    jni_ref = _access_static_field(b"${className.fullyQualifiedJniName()}", b"INSTANCE", b"L${className.fullyQualifiedJniName()};")
+    jni_ref = _access_static_field(b"${className.fullyQualifiedJniName()}", b"${function.staticInstanceFieldName()}", b"L${function.staticInstanceClassName(className)};")
     @else
     jni_ref = self._jni_ref
     @endif
 
     result = _call_method(
-        b"${className.fullyQualifiedJniName()}",
+        b"${function.fullyQualifiedCallerClassName(className)}",
         jni_ref,
         b"${function.getName()}",
         b"${JniHelper.toJniFunctionSignature(function.getParams(), function.getReturnType())}",

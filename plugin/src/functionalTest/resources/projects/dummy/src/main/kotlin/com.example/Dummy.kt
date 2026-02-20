@@ -16,6 +16,12 @@ class Dummy {
     fun withNullableParam(required: String, optional: String?): String = required + (optional ?: "")
 
     class NestedDummy
+
+    companion object {
+        fun callMeMaybe() {
+
+        }
+    }
 }
 
 class NestedClass1

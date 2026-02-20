@@ -66,6 +66,30 @@ class KotlinFunction(
     val docString: String?,
 ) {
     val isStatic = kind == FunctionKind.StaticTopLevel || kind == FunctionKind.StaticCompanion
+
+    // --
+    // Helper methods for codegen to deal with static function weirdness
+    fun fullyQualifiedCallerClassName(className: ClassName): String {
+        return if (kind == FunctionKind.StaticCompanion) {
+            $$"$${className.fullyQualifiedJniName()}$Companion"
+        } else {
+            className.fullyQualifiedJniName()
+        }
+    }
+    fun staticInstanceFieldName(): String {
+        return if (kind == FunctionKind.StaticCompanion) {
+            "Companion"
+        } else {
+            "INSTANCE"
+        }
+    }
+    fun staticInstanceClassName(className: ClassName): String {
+        return if (kind == FunctionKind.StaticCompanion) {
+            $$"$${className.fullyQualifiedJniName()}$Companion"
+        } else {
+            className.fullyQualifiedJniName()
+        }
+    }
 }
 
 @Serializable

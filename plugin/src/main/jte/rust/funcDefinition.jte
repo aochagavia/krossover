@@ -24,7 +24,7 @@ ${new IndentedContent(@`@template.rust.funcParamDecl(funcParams = function.getPa
 )${RustHelper.returnTypeAnnotation(publicApi.getRustConfig().getReturnTypeMappings(), function.getReturnType())} {
 <%--Function body--%>
     @if(function.isStatic())
-    let self_ptr = util::access_static_field(c"${className.fullyQualifiedJniName()}", c"INSTANCE", c"L${className.fullyQualifiedJniName()};");
+    let self_ptr = util::access_static_field(c"${className.fullyQualifiedJniName()}", c"${function.staticInstanceFieldName()}", c"L${function.staticInstanceClassName(className)};");
     @else
     let self_ptr = self.to_kotlin_object();
     @endif
@@ -35,7 +35,7 @@ ${new IndentedContent(@`@template.rust.funcCallParamObjects(functionParams = fun
     let (_, _detach_guard) = util::attach_thread_to_java_vm();
     let result = call_jvm_function!(
         util,
-        c"${className.fullyQualifiedJniName()}",
+        c"${function.fullyQualifiedCallerClassName(className)}",
         c"${function.getName()}",
         c"${JniHelper.toJniFunctionSignature(function.getParams(), function.getReturnType())}",
         Call${JniHelper.returnTypeToJniCallName(function.getReturnType())},
