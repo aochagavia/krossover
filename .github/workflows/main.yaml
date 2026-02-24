@@ -18,5 +18,11 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v5
 
+    - name: Setup pixi
+      uses: prefix-dev/setup-pixi@v0.9.4
+      with:
+        pixi-version: v0.62.2
+        cache: true
+
     - name: Run tests
-      run: ./gradlew check
+      run: pixi run ./gradlew check

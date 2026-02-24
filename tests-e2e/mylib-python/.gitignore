@@ -1,0 +1,5 @@
+__pycache__
+
+# Generated files
+*.h
+src/mylib/__init__.py

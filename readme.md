@@ -97,10 +97,19 @@ Krossover generates a `jni-config.json` file that should be fed into GraalVM (th
 know which classes should be included in the native binary).
 
 Manually scaffolding the wrapper libraries can be tricky. Compiling your Kotlin code using GraalVM
-Native image is challenging too. Given the current lack of documentation, refer to the [KSON
-repository](https://github.com/kson-org/kson/) for a real-world project that uses Krossover. Feel
-free to [ask questions on Zulip](https://kson-org.zulipchat.com/#narrow/channel/540263-krossover) as
-well.
+Native image is challenging too. Check out Krossover's [end-to-end tests](./tests-e2e/) for a minimal
+working setup, or look at the [KSON repository](https://github.com/kson-org/kson/)
+for a real-world usage example. Feel free to [ask questions on Zulip](https://kson-org.zulipchat.com/#narrow/channel/540263-krossover)
+as well.
+
+## Limitations
+
+Krossover is currently in very early stages and there is limited time to work on features. As of
+this writing, the following features are not supported (and are not planned either):
+
+- Exposing `suspend` functions.
+- Catching exceptions from outside Kotlin (uncaught exceptions are forbidden).
+- Exposing bare functions (that is, functions defined at the top-level instead of inside a class or object).
 
 ## Development
 
@@ -123,14 +132,19 @@ Krossover has the following components, each living in its own subproject:
 
 #### Testing
 
-Currently, out automated tests (i.e. `./gradlew check`) only exercise basic functionality. We are
-leaning heavily on the tests inside the KSON project to ensure the generated wrappers are actually
-correct (we run those manually against development versions of Krossover). If / when this project
-gains more users, we expect to develop a more comprehensive test suite.
+Our automated tests (i.e. `./gradlew check`) are divided into three categories:
+
+- Unit tests.
+- Integration tests ([functional tests](https://docs.gradle.org/current/userguide/part6_functional_test.html) in Gradle parlance):
+  they test that the plugin can be installed and works properly on test projects.
+- E2E tests (in a separate project, `test-e2e`): they test that a project can generate bindings, and then test the bindings
+  themselves.
+
+Note: if the need for debugging krossover arises, the integration tests are probably the best place (the IntelliJ debugger just
+works).
 
 #### Ideas for the future
 
-- Provide more information on how to use GralVM to compile Kotlin projects.
 - Support third-party language providers. Currently, the only way to add support for a new language
   in Krossover is to implement it in this repository. It should be possible to design a system that
   enables independent implementations of target languages.

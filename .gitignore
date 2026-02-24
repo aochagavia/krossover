@@ -4,3 +4,7 @@
 .mvn-repo
 build
 gradle/jdk
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml

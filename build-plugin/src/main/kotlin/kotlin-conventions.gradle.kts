@@ -70,27 +70,30 @@ signing {
     sign(publishing.publications["mavenJava"])
 }
 
-java {
-    withJavadocJar()
-}
-
 // Configure artifact
 group = "nl.ochagavia.krossover"
 version = "1.0.7-SNAPSHOT"
 
 // Configure java version
-val javaVersion = "11"
+val javaVersion = 11
+
+java {
+    withJavadocJar()
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+        vendor.set(JvmVendorSpec.GRAAL_VM)
+    }
+}
 
 tasks.withType<JavaCompile>().configureEach {
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
+    options.release.set(11)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     compilerOptions {
         jvmTarget.set(
             org.jetbrains.kotlin.gradle.dsl.JvmTarget
-                .fromTarget(javaVersion),
+                .fromTarget(javaVersion.toString()),
         )
     }
 }
