@@ -1,0 +1,10 @@
+[package]
+name = "mylib-sys"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[build-dependencies]
+anyhow = "1.0.100"
+bindgen = "0.71.0"

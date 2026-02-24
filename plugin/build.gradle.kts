@@ -9,7 +9,7 @@ dependencies {
     implementation("nl.ochagavia.krossover:shared-internals:${rootProject.version}")
 
     implementation(gradleApi())
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.20")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.10")
     implementation("com.google.devtools.ksp:symbol-processing-gradle-plugin:2.2.20-2.0.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.9.0")
 
@@ -66,12 +66,13 @@ gradlePlugin.testSourceSets.add(functionalTestSourceSet)
 // jar's metadata. However, the resources approach is more robust (i.e. it also works on functional
 // tests).
 tasks.register("writeVersion") {
+    val projectVersion = project.version
     val outDir = layout.buildDirectory.dir("generated/resources/version")
     outputs.dir(outDir)
     doLast {
         val file = outDir.get().asFile.resolve("version.properties")
         file.parentFile.mkdirs()
-        file.writeText("version=${project.version}\n")
+        file.writeText("version=${projectVersion}\n")
     }
 }
 

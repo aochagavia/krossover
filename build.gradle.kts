@@ -1,37 +1,18 @@
 import java.util.*
 
-plugins {
-    id("me.filippov.gradle.jvm.wrapper") version "0.14.0"
-}
-
 val sharedProps = Properties().apply {
     project.file("jdk.properties").inputStream().use { load(it) }
-}
-
-// NOTE: `./gradlew wrapper` must be run for edit to this config to take effect
-jvmWrapper {
-    unixJvmInstallDir = sharedProps.getProperty("unixJvmInstallDir")
-    winJvmInstallDir = sharedProps.getProperty("winJvmInstallDir")
-    macAarch64JvmUrl = sharedProps.getProperty("macAarch64JvmUrl")
-    macX64JvmUrl = sharedProps.getProperty("macX64JvmUrl")
-    linuxAarch64JvmUrl = sharedProps.getProperty("linuxAarch64JvmUrl")
-    linuxX64JvmUrl = sharedProps.getProperty("linuxX64JvmUrl")
-    windowsX64JvmUrl = sharedProps.getProperty("windowsX64JvmUrl")
 }
 
 repositories {
     mavenCentral()
 }
 
-tasks.register("cleanMvnRepo") {
-    delete(".mvn-repo")
-}
-
 // The plugin project and its dependencies
 val pluginAndDeps = listOf("shared-internals", "ksp-processor", "plugin")
 
 // Useful for local development and testing
-tasks.register("publishDev") {
+val publishDev by tasks.registering {
     pluginAndDeps.forEach {
         dependsOn(gradle.includedBuild(it).task(":publishMavenJavaPublicationToDevRepository"))
     }
@@ -64,14 +45,25 @@ tasks.register("functionalTest") {
     group = "verification"
 
     // Make sure the everything has been published
-    dependsOn("publishDev")
+    dependsOn(publishDev)
     dependsOn(gradle.includedBuild("plugin").task(":functionalTest"))
+}
+
+val checkE2e by tasks.registering(Exec::class) {
+    dependsOn(publishDev)
+
+    group = "verification"
+    commandLine = "./gradlew check".split(" ")
+    workingDir = projectDir.resolve("tests-e2e")
+    standardOutput = System.out
+    errorOutput = System.err
+    isIgnoreExitValue = false
 }
 
 tasks.register("check") {
     group = "verification"
 
-    dependsOn("functionalTest")
+    dependsOn("functionalTest", checkE2e)
 
     pluginAndDeps.forEach {
         dependsOn(gradle.includedBuild(it).task(":check"))
