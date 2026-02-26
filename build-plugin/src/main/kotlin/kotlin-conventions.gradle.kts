@@ -71,7 +71,7 @@ signing {
 
 // Configure artifact
 group = "nl.ochagavia.krossover"
-version = "1.0.7-SNAPSHOT"
+version = "1.0.8-SNAPSHOT"
 
 // Configure java version
 val javaVersion = 11
