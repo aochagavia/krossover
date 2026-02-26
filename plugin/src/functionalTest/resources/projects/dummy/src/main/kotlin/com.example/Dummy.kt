@@ -1,5 +1,10 @@
 package com.example
 
+class MyList(private val backing: List<String>) : AbstractList<String>() {
+    override val size: Int get() = backing.size
+    override fun get(index: Int): String = backing[index]
+}
+
 sealed class MyOptional {
     class Something(val value: Any) : MyOptional()
 
@@ -20,6 +25,10 @@ class Dummy {
     companion object {
         fun callMeMaybe() {
 
+        }
+
+        fun getList() : MyList {
+            return MyList(emptyList())
         }
     }
 }

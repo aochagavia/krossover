@@ -401,6 +401,15 @@ pub(super) fn from_kotlin_list<T: FromKotlinObject>(list: jobject) -> Vec<T> {
     elements
 }
 
+pub(super) fn to_kotlin_map<
+   K: ToKotlinObject + Eq + std::hash::Hash,
+   V: ToKotlinObject,
+>(
+    _map: &std::collections::HashMap<K, V>
+) -> KotlinPtr {
+    unimplemented!()
+}
+
 pub(super) fn from_kotlin_value_map<
     K: FromKotlinObject + Eq + std::hash::Hash,
     V: FromKotlinObject,

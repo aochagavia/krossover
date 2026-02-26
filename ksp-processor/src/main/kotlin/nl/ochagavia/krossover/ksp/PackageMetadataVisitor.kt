@@ -6,6 +6,7 @@ import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.isLocal
 import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
@@ -25,6 +26,21 @@ import nl.ochagavia.krossover.KotlinLibrary
 import nl.ochagavia.krossover.KotlinProperty
 import nl.ochagavia.krossover.KotlinType
 import java.util.*
+
+fun KSDeclaration.qualifiedNameWithFallback() : String {
+    return (qualifiedName ?: simpleName).asString()
+}
+
+fun KSDeclaration.safePackageName() : String {
+    return try {
+        packageName.asString()
+    } catch (e : NullPointerException) {
+        // The KSP API is not super elegant here, since it sometimes throws a `NullPointerException`
+        // when some internal data is not available. Here we catch that and return the empty package
+        // name.
+        ""
+    }
+}
 
 class PackageMetadataVisitor {
     val pendingClassDecls: Queue<KSClassDeclaration> = LinkedList()
@@ -90,7 +106,7 @@ class PackageMetadataVisitor {
             return true
         }
 
-        val className = ClassName.potentiallyNested(classDecl.packageName.asString(), classDecl.qualifiedName!!.asString())
+        val className = ClassName.potentiallyNested(classDecl.safePackageName(), classDecl.qualifiedNameWithFallback())
         if (this.classes.containsKey(className) || this.enums.containsKey(className)) {
             // Already handled, move on to the next one
             return true
@@ -122,7 +138,7 @@ class PackageMetadataVisitor {
         classDecl.declarations.forEach {
             if (it is KSClassDeclaration) {
                 if (it.isCompanionObject) {
-                    companionObjectName = ClassName.potentiallyNested(it.packageName.asString(), it.qualifiedName!!.asString())
+                    companionObjectName = ClassName.potentiallyNested(it.safePackageName(), it.qualifiedNameWithFallback())
 
                     // Static functions
                     it.getDeclaredFunctions().forEach { fnDecl ->
@@ -137,7 +153,7 @@ class PackageMetadataVisitor {
             }
 
             // Public functions
-            if (it is KSFunctionDeclaration && !it.isAbstract && it.getVisibility() == Visibility.PUBLIC) {
+            if (it is KSFunctionDeclaration && it.getVisibility() == Visibility.PUBLIC) {
                 if (it.isConstructor()) {
                     // Objects also have constructors, but those aren't exposed in the FFI (objects are singletons, so
                     // creation is handled by kotlin itself)
@@ -223,16 +239,18 @@ class PackageMetadataVisitor {
                     throw RuntimeException("parent of enum entry should always be a class declaration")
                 }
 
-                val enumName = ClassName.potentiallyNested(classParent.packageName.asString(), classParent.qualifiedName!!.asString())
+                // The package name is the same for the enum and all its entries
+                val enumPackage = classParent.safePackageName()
+                val enumName = ClassName.potentiallyNested(enumPackage, classParent.qualifiedNameWithFallback())
                 val enumMetadata = this.enums[enumName]!!
 
-                val enumEntryName = ClassName.potentiallyNested(classDecl.packageName.asString(), classDecl.qualifiedName!!.asString())
+                val enumEntryName = ClassName.potentiallyNested(enumPackage, classDecl.qualifiedNameWithFallback())
                 enumMetadata.entries.add(KotlinEnumEntry(enumEntryName, classDecl.docString))
             }
             else -> {
                 val sealedSubclassesForThisClass = arrayListOf<ClassName>()
                 classDecl.getSealedSubclasses().forEach {
-                    val subclassName = ClassName.potentiallyNested(it.packageName.asString(), it.qualifiedName!!.asString())
+                    val subclassName = ClassName.potentiallyNested(it.safePackageName(), it.qualifiedNameWithFallback())
                     sealedSubclassesForThisClass.add(subclassName)
                     sealedSubclasses.add(subclassName)
                 }
@@ -256,11 +274,11 @@ class PackageMetadataVisitor {
                 if (classParent is KSClassDeclaration) {
                     val list =
                         this.nestedClasses.getOrPut(
-                            ClassName.potentiallyNested(classParent.packageName.asString(), classParent.qualifiedName!!.asString()),
+                            ClassName.potentiallyNested(classParent.safePackageName(), classParent.qualifiedNameWithFallback()),
                         ) {
                             arrayListOf()
                         }
-                    list.add(ClassName.potentiallyNested(classDecl.packageName.asString(), classDecl.qualifiedName!!.asString()))
+                    list.add(ClassName.potentiallyNested(classDecl.safePackageName(), classDecl.qualifiedNameWithFallback()))
                 }
                 this.classes[className] = classMetadata
             }
@@ -330,7 +348,7 @@ class PackageMetadataVisitor {
         }
 
         val typeDecl = type.declaration
-        val name = ClassName.potentiallyNested(typeDecl.packageName.asString(), typeDecl.qualifiedName!!.asString())
+        val name = ClassName.potentiallyNested(typeDecl.safePackageName(), typeDecl.qualifiedNameWithFallback())
 
         // Generics
         val params = mutableListOf<KotlinType>()
