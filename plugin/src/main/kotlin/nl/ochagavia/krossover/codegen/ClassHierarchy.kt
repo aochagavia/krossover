@@ -86,7 +86,10 @@ class ClassHierarchy {
         callback: (KotlinClass) -> Unit,
     ) {
         var superclassType = clazz.superclass
-        while (superclassType != null) {
+
+        // We do not always have access to the superclass declaration, because it might come from
+        // an external library
+        while (superclassType != null && classes.containsKey(superclassType.name)) {
             val superclass = classes[superclassType.name]!!
             callback(superclass)
 

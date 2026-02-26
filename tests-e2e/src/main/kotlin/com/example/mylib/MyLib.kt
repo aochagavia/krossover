@@ -22,6 +22,21 @@ object Math {
     }
 }
 
+object MapFunctions {
+    fun getMap(): Map<String, String> {
+        return mapOf(
+            Pair("the answer", "42"),
+            Pair("hello", "world")
+        )
+    }
+
+    fun processMap(map: Map<String, String>): String {
+        return map.map {
+            "${it.key}: ${it.value}"
+        }.joinToString(", ")
+    }
+}
+
 // Companion objects
 class NonZeroInt private constructor(val value: Int) {
     companion object {

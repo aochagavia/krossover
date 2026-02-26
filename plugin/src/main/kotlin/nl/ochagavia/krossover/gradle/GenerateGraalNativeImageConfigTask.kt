@@ -33,6 +33,7 @@ abstract class GenerateGraalNativeImageConfigTask : DefaultTask() {
                 "java.lang.Class",
                 "java.util.ArrayList", // Necessary to create lists
                 "java.util.List",
+                "java.util.HashMap", // Necessary to create maps
                 "java.util.Map",
                 "java.util.Iterator", // Necessary to iterate through maps and lists
                 "java.util.Set", // Necessary to iterate through maps

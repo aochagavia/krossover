@@ -57,21 +57,11 @@ data class ClassName private constructor(
         val double = notNested("kotlin.Double")
     }
 
-    fun withNestedClass(
-        packageName: String,
-        fullyQualifiedJavaClassName: String,
-    ): ClassName {
-        val classToNest = potentiallyNested(packageName, fullyQualifiedJavaClassName)
-        return ClassName("${this.name}\$${classToNest.name}")
-    }
-
     fun isNestedClass(): Boolean = name.contains('$')
 
     fun fullyQualifiedName(): String = name
 
     fun fullyQualifiedJniName(): String = name.replace(".", "/")
-
-    fun fullyQualifiedJavaName(): String = name.replace('$', '.')
 
     fun unqualifiedNameParts(): List<String> {
         val nameWithoutPackage = name.substringAfterLast('.', name)

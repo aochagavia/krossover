@@ -12,7 +12,6 @@ publishing {
     publications {
         create<MavenPublication>("mavenJava") {
             from(components["java"])
-            artifact(tasks.kotlinSourcesJar)
 
             pom {
                 licenses {
@@ -78,6 +77,7 @@ version = "1.0.7-SNAPSHOT"
 val javaVersion = 11
 
 java {
+    withSourcesJar()
     withJavadocJar()
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(25))
