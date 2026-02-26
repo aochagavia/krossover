@@ -13,6 +13,20 @@ def test_divide_success():
     assert isinstance(result, MyResult.Success)
     assert result.value() == 42
 
+def test_get_map():
+    map = MapFunctions.get_map()
+    assert map == {
+        "the answer": "42",
+        "hello": "world"
+    }
+
+def test_process_map():
+    map = {
+        "name": "John Doe",
+        "age": "42"
+    }
+    assert MapFunctions.process_map(map) == "name: John Doe, age: 42"
+
 def test_create_non_zero_error():
     result = NonZeroInt.from_int(0)
     assert isinstance(result, MyResult.Failure)

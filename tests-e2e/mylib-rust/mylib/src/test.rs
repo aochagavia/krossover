@@ -1,4 +1,5 @@
 use super::*;
+use std::collections::HashMap;
 
 #[test]
 fn test_divide_by_zero() {
@@ -20,6 +21,26 @@ fn test_divide_success() {
         }
         _ => panic!("expected Success"),
     }
+}
+
+#[test]
+fn test_get_map() {
+    let map = MapFunctions::get_map();
+    let expected: HashMap<_, _> = [
+        ("the answer".to_string(), "42".to_string()),
+        ("hello".to_string(), "world".to_string()),
+    ].into_iter().collect();
+    assert_eq!(&map, &expected);
+}
+
+#[test]
+fn test_process_map() {
+    let map: HashMap<_, _> = [
+        ("name", "John Doe"),
+        ("age", "42"),
+    ].into_iter().collect();
+    let output = MapFunctions::process_map(&map);
+    assert_eq!(&output, "name: John Doe, age: 42");
 }
 
 #[test]

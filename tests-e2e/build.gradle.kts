@@ -36,7 +36,11 @@ krossover {
 
     // The root classes that act as entrypoints for the public API. Krossover
     // will expose them and all classes that are publicly referenced by them.
-    rootClasses = listOf("com.example.mylib.Math", "com.example.mylib.NonZeroInt")
+    rootClasses = listOf(
+        "com.example.mylib.Math",
+        "com.example.mylib.MapFunctions",
+        "com.example.mylib.NonZeroInt"
+    )
 
     // Classes will only be exposed if they are defined inside the specified
     // packages.
