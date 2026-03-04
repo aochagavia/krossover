@@ -54,3 +54,10 @@ class NonZeroInt private constructor(val value: Int) {
         return x / value
     }
 }
+
+object MyObject {
+    // Reference a class from the `core` project
+    fun getForeignClass() : MyForeignClass {
+        return MyForeignClass()
+    }
+}

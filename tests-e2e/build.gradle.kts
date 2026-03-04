@@ -29,6 +29,10 @@ kotlin {
     }
 }
 
+dependencies {
+    implementation(project(":core"))
+}
+
 krossover {
     // The name of the library artifact (e.g. `mylib` maps to `libmylib.so
     // on Linux).
@@ -39,7 +43,8 @@ krossover {
     rootClasses = listOf(
         "com.example.mylib.Math",
         "com.example.mylib.MapFunctions",
-        "com.example.mylib.NonZeroInt"
+        "com.example.mylib.NonZeroInt",
+        "com.example.mylib.MyObject"
     )
 
     // Classes will only be exposed if they are defined inside the specified
