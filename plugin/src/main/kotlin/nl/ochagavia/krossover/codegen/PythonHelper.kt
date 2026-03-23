@@ -18,7 +18,7 @@ object PythonHelper {
     fun classDefInherits(clazz: KotlinClass): String {
         val superclass = clazz.superclass
         return if (superclass == null) {
-            ""
+            "(KotlinObjectBase)"
         } else {
             "(${superclass.name.unqualifiedNameWithNesting(".")})"
         }

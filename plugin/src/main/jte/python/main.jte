@@ -278,6 +278,14 @@ def _to_kotlin_map(items: Dict[Any, Any]) -> Any:
 
         return map
 
+
+class KotlinObjectBase:
+    def __eq__(self, other):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
+
+    def __hash__(self):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
+
 ############
 # Wrappers #
 ############
