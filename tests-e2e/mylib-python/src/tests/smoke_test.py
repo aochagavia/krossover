@@ -44,6 +44,10 @@ def test_different_threads():
         value = executor.submit(lambda: result.value()).result()
         assert value == 33
 
+def test_returned_boolean():
+    assert Math.is_zero(0) is True
+    assert Math.is_zero(1) is False
+
 def test_eq_hash():
     # Each class has its own instance
     result1 = NonZeroInt.from_int(33)

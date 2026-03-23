@@ -20,6 +20,10 @@ object Math {
             MyResult.Success(x / y)
         }
     }
+
+    fun isZero(x: Int): Boolean {
+        return x == 0
+    }
 }
 
 object MapFunctions {
