@@ -153,7 +153,7 @@ class PackageMetadataVisitor {
             }
 
             // Public functions
-            if (it is KSFunctionDeclaration && it.getVisibility() == Visibility.PUBLIC) {
+            if (it is KSFunctionDeclaration && it.getVisibility() == Visibility.PUBLIC && it.origin != Origin.SYNTHETIC) {
                 if (it.isConstructor()) {
                     // Objects also have constructors, but those aren't exposed in the FFI (objects are singletons, so
                     // creation is handled by kotlin itself)
