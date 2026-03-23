@@ -13,7 +13,6 @@
 <%--Define the outer class--%>
 class ${PythonHelper.classDefName(clazz.getName())}${PythonHelper.classDefInherits(clazz)}:
 ${PythonHelper.formatDocString("    ", clazz.getDocString())}
-    _jni_ref: Any
 
     @for(var subclass : publicApi.getClassHierarchy().allChildren(clazz.getName()))
     ${subclass.unqualifiedName()}: TypeAlias

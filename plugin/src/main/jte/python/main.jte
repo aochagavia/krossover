@@ -280,6 +280,8 @@ def _to_kotlin_map(items: Dict[Any, Any]) -> Any:
 
 
 class KotlinObjectBase:
+    _jni_ref: Any
+
     def __eq__(self, other):
         return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
 
