@@ -83,3 +83,32 @@ fn test_different_threads() {
         _ => panic!("expected Success"),
     }
 }
+
+#[test]
+fn test_returned_boolean() {
+    assert!(Math::is_zero(0));
+    assert!(!Math::is_zero(1));
+}
+
+#[test]
+fn test_eq_hash() {
+    use std::hash::{Hash, Hasher};
+    use std::collections::hash_map::DefaultHasher;
+    fn hash<T: Hash>(t: &T) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        t.hash(&mut hasher);
+        hasher.finish()
+    }
+
+    // Each class has its own instance
+    let result1 = NonZeroInt::from_int(33);
+    let result2 = NonZeroInt::from_int(33);
+    assert_ne!(result1, result2);
+    assert_ne!(hash(&result1), hash(&result2));
+
+    // Objects are singletons
+    let object1 = ChildObject::new();
+    let object2 = ChildObject::new();
+    assert_eq!(object1, object2);
+    assert_eq!(hash(&object1), hash(&object2));
+}
