@@ -18,7 +18,7 @@ object PythonHelper {
     fun classDefInherits(clazz: KotlinClass): String {
         val superclass = clazz.superclass
         return if (superclass == null) {
-            ""
+            "(KotlinObjectBase)"
         } else {
             "(${superclass.name.unqualifiedNameWithNesting(".")})"
         }
@@ -141,13 +141,14 @@ object PythonHelper {
             return nullSafeConversion("lambda $lambdaParam: $className._from_kotlin_enum($lambdaParam)")
         }
 
-        if (JniHelper.toJniPrimitive(type) != null) {
-            // Primitives require no casting
+        // Primitives require no casting, except booleans
+        if (type.name != ClassName.boolean && JniHelper.toJniPrimitive(type) != null) {
             return "lambda $lambdaParam: $lambdaParam"
         }
 
         val baseConversion =
             when (type.name) {
+                ClassName.boolean -> "lambda $lambdaParam: $lambdaParam == 1"
                 ClassName.string -> "_java_string_to_python_str"
                 ClassName.map -> {
                     if (type.params.size != 2) {

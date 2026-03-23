@@ -20,6 +20,10 @@ object Math {
             MyResult.Success(x / y)
         }
     }
+
+    fun isZero(x: Int): Boolean {
+        return x == 0
+    }
 }
 
 object MapFunctions {
@@ -34,6 +38,14 @@ object MapFunctions {
         return map.map {
             "${it.key}: ${it.value}"
         }.joinToString(", ")
+    }
+}
+
+open class ParentClass
+
+object ChildObject : ParentClass() {
+    fun doSomething() : ParentClass {
+        return this
     }
 }
 

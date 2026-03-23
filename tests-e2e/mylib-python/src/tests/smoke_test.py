@@ -43,3 +43,20 @@ def test_different_threads():
         assert isinstance(result, MyResult.Success)
         value = executor.submit(lambda: result.value()).result()
         assert value == 33
+
+def test_returned_boolean():
+    assert Math.is_zero(0) is True
+    assert Math.is_zero(1) is False
+
+def test_eq_hash():
+    # Each class has its own instance
+    result1 = NonZeroInt.from_int(33)
+    result2 = NonZeroInt.from_int(33)
+    assert result1 != result2
+    assert hash(result1) != hash(result2)
+
+    # Objects are singletons
+    object1 = ChildObject()
+    object2 = ChildObject()
+    assert object1 == object2
+    assert hash(object1) == hash(object2)

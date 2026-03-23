@@ -13,7 +13,6 @@
 <%--Define the outer class--%>
 class ${PythonHelper.classDefName(clazz.getName())}${PythonHelper.classDefInherits(clazz)}:
 ${PythonHelper.formatDocString("    ", clazz.getDocString())}
-    _jni_ref: Any
 
     @for(var subclass : publicApi.getClassHierarchy().allChildren(clazz.getName()))
     ${subclass.unqualifiedName()}: TypeAlias
@@ -36,12 +35,6 @@ ${new IndentedContent(@`@template.python.funcCallParams(publicApi = publicApi, f
     def __init__(self):
         self._jni_ref = _access_static_field(b"${clazz.getName().fullyQualifiedJniName()}", b"INSTANCE", b"L${clazz.getName().fullyQualifiedJniName()};")
     @endif
-
-    def __eq__(self, other):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
-
-    def __hash__(self):
-        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
 
     @for(var property : clazz.getProperties())
     ${new IndentedContent(@`@template.python.funcDefinition(publicApi = publicApi, className = clazz.getName(), function = property.getGetter(), functionNameOverride = IdentHelper.trimGetter(property.getGetter().getName()))`)}

@@ -278,14 +278,27 @@ def _to_kotlin_map(items: Dict[Any, Any]) -> Any:
 
         return map
 
+
+class KotlinObjectBase:
+    _jni_ref: Any
+
+    def __init__(self):
+        raise TypeError("This constructor cannot be called directly")
+
+    def __eq__(self, other):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"equals", b"(Ljava/lang/Object;)Z", "BooleanMethod", [other._jni_ref])
+
+    def __hash__(self):
+        return _call_method(b"java/lang/Object", self._jni_ref, b"hashCode", b"()I", "IntMethod", [])
+
 ############
 # Wrappers #
 ############
 
-@for(var clazz : publicApi.getClasses().values())
-@if(!clazz.getName().isNestedClass())
+@for(var className : publicApi.getTopologicallySortedClasses())
+@if(!className.isNestedClass())
 <%-- Only generate code here for non-nested classes, because nested ones will be handled by their parents --%>
-@template.python.classDefinition(publicApi = publicApi, clazz = clazz)
+@template.python.classDefinition(publicApi = publicApi, clazz = publicApi.getClasses().get(className))
 @endif
 @endfor
 

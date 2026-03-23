@@ -5,7 +5,7 @@ import kotlin.io.path.Path
 plugins {
     kotlin("jvm") version "2.2.20"
     id("org.graalvm.buildtools.native") version "0.11.1"
-    id("nl.ochagavia.krossover") version "1.0.8-SNAPSHOT"
+    id("nl.ochagavia.krossover") version "1.0.9-SNAPSHOT"
 }
 
 repositories {
@@ -44,7 +44,8 @@ krossover {
         "com.example.mylib.Math",
         "com.example.mylib.MapFunctions",
         "com.example.mylib.NonZeroInt",
-        "com.example.mylib.MyObject"
+        "com.example.mylib.MyObject",
+        "com.example.mylib.ChildObject"
     )
 
     // Classes will only be exposed if they are defined inside the specified
