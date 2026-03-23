@@ -5,7 +5,7 @@ import kotlin.io.path.Path
 plugins {
     kotlin("jvm") version "2.2.20"
     id("org.graalvm.buildtools.native") version "0.11.1"
-    id("nl.ochagavia.krossover") version "1.0.8-SNAPSHOT"
+    id("nl.ochagavia.krossover") version "1.0.9-SNAPSHOT"
 }
 
 repositories {
