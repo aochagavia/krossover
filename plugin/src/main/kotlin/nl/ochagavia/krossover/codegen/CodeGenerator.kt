@@ -4,6 +4,7 @@ import gg.jte.ContentType
 import gg.jte.TemplateEngine
 import gg.jte.TemplateException
 import gg.jte.output.StringOutput
+import nl.ochagavia.krossover.ClassName
 import nl.ochagavia.krossover.KotlinLibrary
 import org.gradle.api.GradleException
 import java.io.File
@@ -21,13 +22,16 @@ class CodeGenerator {
     ) {
         engine = TemplateEngine.createPrecompiled(Path("."), ContentType.Plain, this::class.java.classLoader)
         engine.setTrimControlStructures(true)
+
+        val classHierarchy = ClassHierarchy(kotlinLibrary)
         publicApi =
             PublicApi(
                 kotlinLibrary.classes,
+                sortClasses(kotlinLibrary.classes.keys, classHierarchy),
                 kotlinLibrary.sealedSubclasses,
                 kotlinLibrary.enums,
                 kotlinLibrary.nestedClasses,
-                ClassHierarchy(kotlinLibrary),
+                classHierarchy,
                 libName,
                 rustConfig,
             )
@@ -79,4 +83,42 @@ class CodeGenerator {
                 .readAllBytes()
                 .toString(Charsets.UTF_8)
     }
+}
+
+/**
+ * Topologically sort classes so parents are listed before their children
+ */
+private fun sortClasses(
+    classes: Iterable<ClassName>,
+    classHierarchy: ClassHierarchy,
+): List<ClassName> {
+    val visited = mutableSetOf<ClassName>()
+    val sorted = mutableListOf<ClassName>()
+
+    // Note that this is not a generic topological sort, but works here because nodes have
+    // at most one child (Kotlin only supports single-parent inheritance). Hence, BFS is
+    // enough.
+    val queue = ArrayDeque<ClassName>()
+    for (className in classes) {
+        if (!classHierarchy.hasSuperclass(className)) {
+            // Classes without a parent come first, then their children (recursively)
+            queue.add(className)
+        }
+    }
+
+    while (queue.isNotEmpty()) {
+        val className = queue.removeFirst()
+        if (visited.contains(className)) {
+            continue
+        }
+
+        visited.add(className)
+        sorted.add(className)
+
+        for (child in classHierarchy.directChildren(className)) {
+            queue.add(child)
+        }
+    }
+
+    return sorted
 }

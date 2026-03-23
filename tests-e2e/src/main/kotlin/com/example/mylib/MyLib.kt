@@ -37,6 +37,14 @@ object MapFunctions {
     }
 }
 
+open class ParentClass
+
+object ChildObject : ParentClass() {
+    fun doSomething() : ParentClass {
+        return this
+    }
+}
+
 // Companion objects
 class NonZeroInt private constructor(val value: Int) {
     companion object {

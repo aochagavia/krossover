@@ -27,6 +27,8 @@ class ClassHierarchy {
         childMap = map
     }
 
+    fun directChildren(className: ClassName): List<ClassName> = this.childMap[className] ?: emptyList()
+
     fun allChildren(className: ClassName): List<ClassName> {
         val directChildren = childMap.get(className) ?: return emptyList()
         val transitiveChildren = directChildren.flatMap { allChildren(it) }
@@ -80,6 +82,8 @@ class ClassHierarchy {
 
         return inherited
     }
+
+    fun hasSuperclass(className: ClassName): Boolean = classes[className]!!.superclass != null
 
     fun walkSuperclasses(
         clazz: KotlinClass,

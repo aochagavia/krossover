@@ -44,7 +44,8 @@ krossover {
         "com.example.mylib.Math",
         "com.example.mylib.MapFunctions",
         "com.example.mylib.NonZeroInt",
-        "com.example.mylib.MyObject"
+        "com.example.mylib.MyObject",
+        "com.example.mylib.ChildObject"
     )
 
     // Classes will only be exposed if they are defined inside the specified

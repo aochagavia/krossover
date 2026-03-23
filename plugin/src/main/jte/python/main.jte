@@ -282,10 +282,10 @@ def _to_kotlin_map(items: Dict[Any, Any]) -> Any:
 # Wrappers #
 ############
 
-@for(var clazz : publicApi.getClasses().values())
-@if(!clazz.getName().isNestedClass())
+@for(var className : publicApi.getTopologicallySortedClasses())
+@if(!className.isNestedClass())
 <%-- Only generate code here for non-nested classes, because nested ones will be handled by their parents --%>
-@template.python.classDefinition(publicApi = publicApi, clazz = clazz)
+@template.python.classDefinition(publicApi = publicApi, clazz = publicApi.getClasses().get(className))
 @endif
 @endfor
 

@@ -26,6 +26,7 @@ class PythonHelperTests {
         classHierarchy = ClassHierarchy(emptyKotlinLibrary()),
         libName = "test",
         rustConfig = RustConfig("test_sys", emptyMap()),
+        topologicallySortedClasses = emptyList(),
     )
 
     @Test

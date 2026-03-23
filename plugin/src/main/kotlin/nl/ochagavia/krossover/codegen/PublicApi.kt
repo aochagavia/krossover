@@ -7,6 +7,7 @@ import nl.ochagavia.krossover.gradle.ReturnTypeMapping
 
 class PublicApi(
     val classes: HashMap<ClassName, KotlinClass>,
+    val topologicallySortedClasses: List<ClassName>,
     val sealedSubclasses: Set<ClassName>,
     val enums: HashMap<ClassName, KotlinEnum>,
     val nestedClasses: HashMap<ClassName, ArrayList<ClassName>>,
